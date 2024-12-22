@@ -68,25 +68,21 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
 
-          // Extract necessary fields
           String token = data['token'];
           String userId = data['user']['id'];
           String userEmail = data['user']['email'];
           bool isAdmin = data['user']['isAdmin'] ?? false;
 
           if (!isAdmin) {
-            // If the user is not an admin, show an error
             _showError('Access denied. Admins only.');
             return;
           }
 
-          // Save user credentials if they are an admin
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('auth_token', token);
           await prefs.setString('user_id', userId);
           await prefs.setString('user_email', userEmail);
 
-          // Navigate to Home screen
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => Home()),
@@ -102,7 +98,6 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
             ),
           );
         } else {
-          // Handle login errors
           final error = jsonDecode(response.body)['error'] ?? 'Login failed';
           _showError(error);
         }
@@ -132,7 +127,6 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     return Scaffold(
       body: Stack(
         children: [
-          // Background Gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -145,8 +139,8 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           Center(
             child: SingleChildScrollView(
               child: Container(
-                width: isDesktop ? 500 : screenWidth * 0.9, // Adjust width for desktop and mobile
-                height: isDesktop ? 650 : 550, // Increased height
+                width: isDesktop ? 500 : screenWidth * 0.9,
+                height: isDesktop ? 650 : 550, 
                 padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 25),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.15),
@@ -163,7 +157,6 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Logo or Login Animation
                     ScaleTransition(
                       scale: _animationController.drive(
                         Tween(begin: 0.9, end: 1.1).chain(CurveTween(curve: Curves.easeInOut)),
@@ -175,7 +168,6 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                       ),
                     ),
 
-                    // Welcome Text
                     Column(
                       children: const [
                         Text(
@@ -207,12 +199,10 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                       ],
                     ),
 
-                    // Login Form
                     Form(
                       key: _formKey,
                       child: Column(
                         children: [
-                          // Email Field
                           TextFormField(
                             controller: _emailController,
                             decoration: InputDecoration(
@@ -239,7 +229,6 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                           ),
                           const SizedBox(height: 20),
 
-                          // Password Field
                           TextFormField(
                             controller: _passwordController,
                             obscureText: !_isPasswordVisible,
@@ -278,7 +267,6 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                     ),
                     const SizedBox(height: 20),
 
-                    // Login Button
                     _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
                         : ElevatedButton(
@@ -302,7 +290,6 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                     ),
                     const SizedBox(height: 20),
 
-                    // Social Login Options
                     Column(
                       children: [
                         const Text(
@@ -318,10 +305,8 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Google Login Button
                             GestureDetector(
                               onTap: () {
-                                // Handle Google login
                                 print('Google login pressed');
                               },
                               child: Container(
@@ -346,10 +331,8 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                             ),
                             const SizedBox(width: 20),
 
-                            // Facebook Login Button
                             GestureDetector(
                               onTap: () {
-                                // Handle Facebook login
                                 print('Facebook login pressed');
                               },
                               child: Container(
