@@ -18,7 +18,7 @@ class Home extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Container(
-            width: screenWidth > 800 ? 800 : screenWidth * 0.9, // Adjust width for web
+            width: screenWidth > 800 ? 800 : screenWidth * 0.9, 
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -37,7 +37,6 @@ class Home extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Dashboard Card Example
                 GridView(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
