@@ -43,10 +43,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _controller.forward();
 
-    // Navigate to the login screen after animation completes
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        Navigator.of(context).pushReplacementNamed('/login'); // Updated to '/login'
+        Navigator.of(context).pushReplacementNamed('/login'); 
       }
     });
   }
@@ -71,19 +70,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo Animation
                 Transform.scale(
                   scaleX: _horizontalScaleAnimation!.value,
                   scaleY: 1.0,
                   child: Icon(
-                    Icons.book, // Replace with your logo if needed
+                    Icons.book, 
                     size: isDesktop ? 150.0 : 100.0,
                     color: Color(0xFF5AA5B1),
                   ),
                 ),
                 const SizedBox(height: 20),
 
-                // Progress Bar
                 Container(
                   width: isDesktop ? screenWidth * 0.4 : screenWidth * 0.7,
                   child: LinearProgressIndicator(
@@ -94,7 +91,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 ),
                 const SizedBox(height: 20),
 
-                // Fade-in Text
                 FadeTransition(
                   opacity: _fadeAnimation!,
 
