@@ -95,7 +95,7 @@ class _HomeState extends State<Home> {
             icon: const Icon(Icons.settings),
             onPressed: () {
               setState(() {
-                _currentIndex = 12; // Navigate to Settings
+                _currentIndex = 12; 
               });
             },
           ),
@@ -200,7 +200,7 @@ class _HomeState extends State<Home> {
         setState(() {
           _currentIndex = index;
         });
-        Navigator.of(context).pop(); // Close the drawer
+        Navigator.of(context).pop();
       },
     );
   }
