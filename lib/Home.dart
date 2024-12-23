@@ -1,101 +1,240 @@
 import 'package:flutter/material.dart';
+import 'package:web_frontend/screens/authors.dart';
+import 'package:web_frontend/screens/books.dart';
+import 'package:web_frontend/screens/categories.dart';
+import 'package:web_frontend/screens/dashboard.dart';
+import 'package:web_frontend/screens/notification_send.dart';
+import 'package:web_frontend/screens/pages.dart';
+import 'package:web_frontend/screens/payment_gateway.dart';
+import 'package:web_frontend/screens/reports.dart';
+import 'package:web_frontend/screens/reviews.dart';
+import 'package:web_frontend/screens/settings.dart';
+import 'package:web_frontend/screens/subscription_plan.dart';
+import 'package:web_frontend/screens/transactions.dart';
+import 'package:web_frontend/screens/users.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
+  final String fullName;
+  final String email;
+  final String profilePicture;
+
+  const Home({
+    Key? key,
+    required this.fullName,
+    required this.email,
+    required this.profilePicture,
+  }) : super(key: key);
+
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  int _currentIndex = 0;
+
+  final Color primaryColor = const Color(0xFF5AA5B1);
+  final Color secondaryColor = const Color(0xFF3D7A8A);
+  final Color highlightColor = const Color(0xFFEDF7F9);
+
+  final List<Widget> _pages = [
+    DashboardPage(),
+    CategoriesPage(),
+    AuthorsPage(),
+    BooksPage(),
+    UsersPage(),
+    SubscriptionPlanPage(),
+    PaymentGatewayPage(),
+    TransactionsPage(),
+    ReviewsPage(),
+    ReportsPage(),
+    PagesPage(),
+    NotificationsPage(),
+    SettingsPage(),
+  ];
+
+  final List<String> _titles = [
+    'Dashboard',
+    'Categories',
+    'Authors',
+    'Books',
+    'Users',
+    'Subscription Plan',
+    'Payment Gateway',
+    'Transactions',
+    'Reviews',
+    'Reports',
+    'Pages',
+    'Notification Send',
+    'Settings',
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Admin Dashboard',
-          style: TextStyle(fontFamily: 'SF-Pro-Text', fontWeight: FontWeight.bold),
+        elevation: 0,
+        title: Text(
+          _titles[_currentIndex],
+          style: const TextStyle(
+            fontFamily: 'SF-Pro-Text',
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        backgroundColor: const Color(0xFF5AA5B1),
+        backgroundColor: primaryColor,
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('No new notifications.')),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              setState(() {
+                _currentIndex = 12; // Navigate to Settings
+              });
+            },
+          ),
+        ],
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Container(
-            width: screenWidth > 800 ? 800 : screenWidth * 0.9, 
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Welcome Back, Admin!',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF3D7A8A),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  'Here is an overview of your dashboard:',
-                  style: TextStyle(fontSize: 16, color: Colors.black87),
-                ),
-                const SizedBox(height: 20),
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 500),
+        child: _pages[_currentIndex],
+      ),
+      drawer: _buildSideNavigationBar(context),
+      backgroundColor: Colors.grey[100],
+    );
+  }
 
-                GridView(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: screenWidth > 800 ? 3 : 2,
-                    crossAxisSpacing: 15,
-                    mainAxisSpacing: 15,
-                  ),
+  Widget _buildSideNavigationBar(BuildContext context) {
+    return Drawer(
+      backgroundColor: primaryColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [secondaryColor, primaryColor],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 35,
+                  backgroundImage: NetworkImage(widget.profilePicture),
+                ),
+                const SizedBox(width: 15),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDashboardCard('Total Users', Icons.people, '120'),
-                    _buildDashboardCard('Books Sold', Icons.book, '450'),
-                    _buildDashboardCard('Revenue', Icons.attach_money, '\$12,300'),
-                    _buildDashboardCard('Pending Orders', Icons.pending_actions, '8'),
-                    _buildDashboardCard('Feedbacks', Icons.feedback, '25'),
+                    Text(
+                      widget.fullName,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      widget.email,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
+                      ),
+                    ),
                   ],
                 ),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDashboardCard(String title, IconData icon, String value) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF5AA5B1),
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            spreadRadius: 2,
+          Expanded(
+            child: ListView(
+              children: List.generate(_titles.length, (index) {
+                return _buildDrawerItem(
+                  context,
+                  _getIconForIndex(index),
+                  _titles[index],
+                  index,
+                );
+              }),
+            ),
           ),
-        ],
-      ),
-      padding: const EdgeInsets.all(15),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 40, color: Colors.white),
-          const SizedBox(height: 10),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 14, color: Colors.white),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              'Version 1.0.0',
+              style: TextStyle(color: Colors.white70, fontSize: 12),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildDrawerItem(
+      BuildContext context, IconData icon, String title, int index) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: _currentIndex == index ? highlightColor : Colors.white,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: _currentIndex == index ? highlightColor : Colors.white,
+          fontWeight: _currentIndex == index ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      tileColor: _currentIndex == index ? secondaryColor : Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      onTap: () {
+        setState(() {
+          _currentIndex = index;
+        });
+        Navigator.of(context).pop(); // Close the drawer
+      },
+    );
+  }
+
+  IconData _getIconForIndex(int index) {
+    switch (index) {
+      case 0:
+        return Icons.dashboard;
+      case 1:
+        return Icons.category;
+      case 2:
+        return Icons.person;
+      case 3:
+        return Icons.book;
+      case 4:
+        return Icons.group;
+      case 5:
+        return Icons.subscriptions;
+      case 6:
+        return Icons.payment;
+      case 7:
+        return Icons.receipt_long;
+      case 8:
+        return Icons.feedback;
+      case 9:
+        return Icons.report;
+      case 10:
+        return Icons.pages;
+      case 11:
+        return Icons.notifications;
+      case 12:
+        return Icons.settings;
+      default:
+        return Icons.home;
+    }
   }
 }

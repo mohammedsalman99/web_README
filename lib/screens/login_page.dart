@@ -66,37 +66,51 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
         });
 
         if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
+          final loginData = jsonDecode(response.body);
 
-          String token = data['token'];
-          String userId = data['user']['id'];
-          String userEmail = data['user']['email'];
-          bool isAdmin = data['user']['isAdmin'] ?? false;
+          String token = loginData['token'];
+          bool isAdmin = loginData['user']['isAdmin'] ?? false;
 
           if (!isAdmin) {
             _showError('Access denied. Admins only.');
             return;
           }
 
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('auth_token', token);
-          await prefs.setString('user_id', userId);
-          await prefs.setString('user_email', userEmail);
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => Home()),
+          // Fetch admin details
+          final adminDetailsResponse = await http.get(
+            Uri.parse('https://readme-backend-zdiq.onrender.com/api/v1/users/me'),
+            headers: {'Authorization': 'Bearer $token'},
           );
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text(
-                'Login successful! Welcome, Admin.',
-                style: TextStyle(fontFamily: 'SF-Pro-Text', fontWeight: FontWeight.w400),
+          if (adminDetailsResponse.statusCode == 200) {
+            final adminData = jsonDecode(adminDetailsResponse.body)['user'];
+
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('auth_token', token);
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Home(
+                  fullName: adminData['fullName'],
+                  email: adminData['email'],
+                  profilePicture: adminData['profilePicture'],
+                ),
               ),
-              backgroundColor: Colors.green,
-            ),
-          );
+            );
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: const Text(
+                  'Login successful! Welcome, Admin.',
+                  style: TextStyle(fontFamily: 'SF-Pro-Text', fontWeight: FontWeight.w400),
+                ),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } else {
+            _showError('Failed to fetch admin details.');
+          }
         } else {
           final error = jsonDecode(response.body)['error'] ?? 'Login failed';
           _showError(error);
