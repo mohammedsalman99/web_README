@@ -27,7 +27,7 @@ class _AdminDashboardPageState extends State<DashboardPage> {
     fetchTransactionCount();
     fetchReviewCount();
     fetchTotalReports();
-    fetchPopularAndLatestBooks(); // Fetch books for popular and latest sections
+    fetchPopularAndLatestBooks(); 
 
   }
 
@@ -40,19 +40,16 @@ class _AdminDashboardPageState extends State<DashboardPage> {
         final data = json.decode(response.body);
         final books = data['books'] ?? [];
 
-        // Sort books by number of views (descending) for popular books
         popularBooks = List.from(books)
           ..sort((a, b) => (b['numberOfViews'] ?? 0).compareTo(a['numberOfViews'] ?? 0));
 
-        // Sort books by creation date (descending) for latest books
         latestBooks = List.from(books)
           ..sort((a, b) => DateTime.parse(b['createdAt']).compareTo(DateTime.parse(a['createdAt'])));
 
-        // Take top 10 books for both categories
         popularBooks = popularBooks.take(10).toList();
         latestBooks = latestBooks.take(10).toList();
 
-        setState(() {}); // Update the UI
+        setState(() {}); 
       } else {
         print('Failed to fetch books. Status Code: ${response.statusCode}');
       }
@@ -77,7 +74,7 @@ class _AdminDashboardPageState extends State<DashboardPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
-          transactionCount = data['pagination']['total'] ?? 0; // Extract the total
+          transactionCount = data['pagination']['total'] ?? 0; 
         });
       } else {
         print('Failed to fetch transactions. Status Code: ${response.statusCode}');
@@ -89,7 +86,7 @@ class _AdminDashboardPageState extends State<DashboardPage> {
   }
 
   Future<void> fetchReviewCount() async {
-    final bookId = '6742251767dbfff613fefcb3'; // Replace with a valid book ID
+    final bookId = '6742251767dbfff613fefcb3';
     final url = 'https://readme-backend-zdiq.onrender.com/api/v1/books/$bookId/reviews';
 
     try {
@@ -103,7 +100,7 @@ class _AdminDashboardPageState extends State<DashboardPage> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('Reviews API Response: ${response.body}'); // Debugging
+        print('Reviews API Response: ${response.body}'); 
         setState(() {
           reviewCount = data['reviews']?.length ?? 0;
         });
@@ -117,11 +114,10 @@ class _AdminDashboardPageState extends State<DashboardPage> {
   }
 
   Future<void> fetchTotalReports() async {
-    final url = 'https://readme-backend-zdiq.onrender.com/api/v1/books/:bookId/reports'; // Adjusted endpoint
+    final url = 'https://readme-backend-zdiq.onrender.com/api/v1/books/:bookId/reports'; 
     int totalReports = 0;
 
     try {
-      // Start fetching reports
       print('Starting request to $url...');
       final response = await http.get(
         Uri.parse(url),
@@ -135,15 +131,12 @@ class _AdminDashboardPageState extends State<DashboardPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
 
-        // Debug log for response data
         print('Response data: $data');
 
-        // Check if reports are present
         if (data != null && data['reports'] != null) {
           final reports = data['reports'];
-          totalReports = reports.length; // Count the number of reports
+          totalReports = reports.length; 
 
-          // Debug log for the number of reports
           print('Reports fetched successfully.');
           print('Total reports: $totalReports');
         } else {
@@ -154,7 +147,6 @@ class _AdminDashboardPageState extends State<DashboardPage> {
         print('Response body: ${response.body}');
       }
 
-      // Update state
       setState(() {
         reportCount = totalReports;
       });
@@ -221,14 +213,13 @@ class _AdminDashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5F5F5), // Light background color for contrast
+      backgroundColor: Color(0xFFF5F5F5), 
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Dashboard Summary Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -242,13 +233,11 @@ class _AdminDashboardPageState extends State<DashboardPage> {
               ),
               SizedBox(height: 30),
 
-              // Popular Books Section
               SectionTitle(title: 'Popular Books'),
               SizedBox(height: 10),
               BookList(books: popularBooks),
               SizedBox(height: 30),
 
-              // Latest Books Section
               SectionTitle(title: 'Latest Books'),
               SizedBox(height: 10),
               BookList(books: latestBooks),
@@ -646,8 +635,8 @@ class BookCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 200, // Adjusted for a wider card
-      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 12), // Added vertical margin
+      width: 200, 
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 12), 
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -660,11 +649,10 @@ class BookCard extends StatelessWidget {
           ),
         ],
       ),
-      child: SingleChildScrollView( // Ensures content doesn't overflow
+      child: SingleChildScrollView( 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Book Image
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.network(
@@ -683,7 +671,6 @@ class BookCard extends StatelessWidget {
             ),
             SizedBox(height: 12),
 
-            // Book Title
             Text(
               book['title'] ?? 'Unknown Title',
               maxLines: 2,
@@ -696,7 +683,6 @@ class BookCard extends StatelessWidget {
             ),
             SizedBox(height: 8),
 
-            // Category
             Text(
               book['category']?['title'] ?? 'Unknown Category',
               style: TextStyle(
@@ -707,7 +693,6 @@ class BookCard extends StatelessWidget {
             ),
             SizedBox(height: 8),
 
-            // Description
             Text(
               book['description'] ?? 'No description available.',
               maxLines: 3,
@@ -719,7 +704,6 @@ class BookCard extends StatelessWidget {
             ),
             SizedBox(height: 12),
 
-            // Views and Rating Row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -747,7 +731,6 @@ class BookCard extends StatelessWidget {
             ),
             SizedBox(height: 12),
 
-            // Author Information
             if (book['authors'] != null && book['authors'].isNotEmpty)
               Text(
                 'Author: ${book['authors'][0]['fullName'] ?? 'Unknown Author'}',
