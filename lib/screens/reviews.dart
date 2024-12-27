@@ -41,8 +41,6 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
         final List<Map<String, dynamic>> books =
         List<Map<String, dynamic>>.from(booksData['books'] ?? []);
         print('Fetched ${books.length} books.');
-
-        // Create a list of Futures for each review fetch
         List<Future> reviewFutures = [];
 
         for (var book in books) {
@@ -51,7 +49,6 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
           reviewsApiUrlTemplate.replaceAll(':bookId', bookId);
           print('Queuing reviews fetch for book ID: $bookId...');
 
-          // For each book, we queue a review fetch operation
           final reviewsFuture = http.get(
             Uri.parse(reviewsApiUrl),
             headers: {
@@ -65,12 +62,10 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
               List<Map<String, dynamic>>.from(reviewsData['reviews'] ?? []);
               print('Fetched ${reviews.length} reviews for book ID: $bookId.');
 
-              // Add the book title to each review
               for (var review in reviews) {
-                review['book'] = book; // Attach the book data to the review
+                review['book'] = book; 
               }
 
-              // Once the reviews are fetched, update the state
               setState(() {
                 _allReviews.addAll(reviews);
               });
@@ -81,10 +76,9 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
             print('Error fetching reviews for book ID: $bookId - $e');
           });
 
-          reviewFutures.add(reviewsFuture); // Add the future to the list
+          reviewFutures.add(reviewsFuture); 
         }
 
-        // Wait for all review fetches to complete
         await Future.wait(reviewFutures);
       } else {
         print('Failed to fetch books: ${booksResponse.statusCode}');
@@ -107,11 +101,9 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
   Future<void> _searchReviews(String query) async {
     setState(() {
       _isLoading = true;
-      // Reset reviews when the search query is cleared
       if (query.isEmpty) {
-        _fetchAllReviews();  // Show all reviews
+        _fetchAllReviews();  
       } else {
-        // Filter reviews by matching the book title or user name or review text
         _allReviews = _allReviews.where((review) {
           final bookTitle = review['book']['title'].toLowerCase();
           final userName = review['user']['fullName'].toLowerCase();
@@ -139,7 +131,7 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
           ),
           child: TextField(
             onChanged: (query) {
-              _searchReviews(query); // Trigger search functionality when text changes
+              _searchReviews(query); 
             },
             decoration: InputDecoration(
               hintText: 'Search reviews...',
@@ -169,7 +161,6 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
   }
 
   Widget _buildReviewCard(Map<String, dynamic> review) {
-    // Safely handle book details
     final book = review['book'];
     final bookTitle = book != null && book['title'] is String
         ? book['title']
@@ -177,8 +168,6 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
     final bookImage = book != null && book['image'] is String
         ? book['image']
         : null;
-
-    // Safely handle user details
     final user = review['user'];
     final userName = user != null && user['fullName'] is String
         ? user['fullName']
@@ -187,11 +176,9 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
         ? user['profilePicture']
         : null;
 
-    // Safely handle review details
     final reviewText = review['review'] ?? 'No review provided.';
     final rating = review['rating'] ?? 0;
 
-    // Safely handle timestamps
     final createdAt = review['createdAt'] ?? '';
     final updatedAt = review['updatedAt'] ?? '';
     final formattedCreatedAt = _formatAdvancedDate(createdAt);
@@ -204,7 +191,7 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFB2EBF2), Color(0xFFE0F7FA)], // Lighter teal gradient
+            colors: [Color(0xFFB2EBF2), Color(0xFFE0F7FA)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -222,11 +209,9 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top Row: User Info and Book Image
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // User Profile Picture
                   CircleAvatar(
                     radius: 30,
                     backgroundImage: userProfilePicture != null
@@ -242,7 +227,6 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // User Name
                         Text(
                           userName,
                           style: TextStyle(
@@ -251,7 +235,6 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
                             color: Color(0xFF00796B),
                           ),
                         ),
-                        // Date Information
                         Text(
                           "Posted: $formattedCreatedAt",
                           style: TextStyle(fontSize: 12, color: Colors.grey),
@@ -264,7 +247,6 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
                       ],
                     ),
                   ),
-                  // Book Image
                   if (bookImage != null)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
@@ -279,7 +261,6 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
               ),
               SizedBox(height: 16),
 
-              // Book Title
               Row(
                 children: [
                   Icon(Icons.book, size: 20, color: Color(0xFF004D40)),
@@ -299,7 +280,6 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
               ),
               SizedBox(height: 12),
 
-              // Review Content
               Container(
                 padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -324,7 +304,6 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
               ),
               SizedBox(height: 12),
 
-              // Rating (as stars)
               Row(
                 children: [
                   Text(
@@ -352,7 +331,6 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
   }
 
 
-// Advanced Date Formatter with Time
   String _formatAdvancedDate(String date) {
     try {
       final DateTime parsedDate = DateTime.parse(date);
