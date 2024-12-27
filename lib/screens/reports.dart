@@ -13,11 +13,11 @@ class _ReportsPageState extends State<ReportsPage> {
   static const String adminToken =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro';
 
-  static const int pageSize = 4; // Show 4 reports per scroll chunk
-  List<Map<String, dynamic>> _allReports = []; // Store all reports
+  static const int pageSize = 4; 
+  List<Map<String, dynamic>> _allReports = []; 
   bool _isLoading = false;
   int _currentChunk = 1;
-  int _totalChunks = 0; // Dynamically calculate based on allReports.length
+  int _totalChunks = 0; 
 
   final ScrollController _scrollController = ScrollController();
 
@@ -35,15 +35,13 @@ class _ReportsPageState extends State<ReportsPage> {
   }
   void _searchBooks(String query) {
     setState(() {
-      // If the search query is empty, reset to show all reports
       if (query.isEmpty) {
-        _fetchReports();  // Fetch and show all reports again
+        _fetchReports();  
       } else {
-        // Filter the reports based on book title
         _allReports = _allReports.where((report) {
           final bookTitle = report['book']['title'].toLowerCase();
           final searchQuery = query.toLowerCase();
-          return bookTitle.contains(searchQuery); // Check if book title matches the query
+          return bookTitle.contains(searchQuery); 
         }).toList();
       }
     });
@@ -61,17 +59,15 @@ class _ReportsPageState extends State<ReportsPage> {
           'Content-Type': 'application/json',
         },
         body: json.encode({
-          'status': 'reviewed', // Set status to "reviewed"
+          'status': 'reviewed', 
         }),
       );
 
       print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}'); // Log the response body for debugging
+      print('Response body: ${response.body}'); 
 
       if (response.statusCode == 200) {
-        // Successfully updated status, you can refresh the reports or update UI
         setState(() {
-          // Update the status locally
           final reportIndex = _allReports.indexWhere((report) => report['_id'] == reportId);
           if (reportIndex != -1) {
             _allReports[reportIndex]['status'] = 'reviewed';
@@ -81,15 +77,13 @@ class _ReportsPageState extends State<ReportsPage> {
           SnackBar(content: Text('Report status updated to "Reviewed"')),
         );
       } else {
-        // Handle failure
         print('Error: Failed to update status, status code: ${response.statusCode}');
-        print('Error body: ${response.body}'); // Log the error body for debugging
+        print('Error body: ${response.body}'); 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to update status: ${response.statusCode}')),
         );
       }
     } catch (e) {
-      // Catch and print any errors during the API request
       print('Error occurred while updating status: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error occurred: $e')),
@@ -137,16 +131,12 @@ class _ReportsPageState extends State<ReportsPage> {
     }
   }
 
-
-  /// Loads the next chunk of reports when scrolling reaches the bottom.
   void _loadMoreReports() {
     if (_currentChunk >= _totalChunks) return;
 
     setState(() {
       _isLoading = true;
     });
-
-    // Simulate chunk loading (already fetched reports are paginated locally)
     Future.delayed(Duration(milliseconds: 500), () {
       setState(() {
         _currentChunk++;
@@ -174,7 +164,7 @@ class _ReportsPageState extends State<ReportsPage> {
             borderRadius: BorderRadius.circular(8),
           ),
           child: TextField(
-            onChanged: _searchBooks,  // Trigger search in books on text change
+            onChanged: _searchBooks, 
             decoration: InputDecoration(
               hintText: 'Search books...',
               hintStyle: TextStyle(color: Colors.grey),
@@ -194,7 +184,7 @@ class _ReportsPageState extends State<ReportsPage> {
             _currentChunk = 1;
             _totalChunks = 0;
           });
-          await _fetchReports(); // Fetch reports from the backend when refreshing
+          await _fetchReports();
         },
         child: ListView.builder(
           controller: _scrollController,
@@ -224,7 +214,7 @@ class _ReportsPageState extends State<ReportsPage> {
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFB2DFDB), Color(0xFFE0F2F1)], // Teal shades
+            colors: [Color(0xFFB2DFDB), Color(0xFFE0F2F1)], 
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -242,11 +232,9 @@ class _ReportsPageState extends State<ReportsPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top Row: User Info and Date
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Enhanced Circle Avatar
                   Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -300,7 +288,6 @@ class _ReportsPageState extends State<ReportsPage> {
                       ],
                     ),
                   ),
-                  // Creation Date
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -317,8 +304,6 @@ class _ReportsPageState extends State<ReportsPage> {
                 ],
               ),
               SizedBox(height: 20),
-
-              // Book Title
               Row(
                 children: [
                   Icon(Icons.book, size: 20, color: Color(0xFF00897B)),
@@ -336,8 +321,6 @@ class _ReportsPageState extends State<ReportsPage> {
                 ],
               ),
               SizedBox(height: 12),
-
-              // Advanced UX for Report Text
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -369,14 +352,11 @@ class _ReportsPageState extends State<ReportsPage> {
               ),
               SizedBox(height: 20),
 
-              // Action Buttons: "Delete" and "Review"
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Delete Button
                   ElevatedButton.icon(
                     onPressed: () {
-                      // Action for Delete
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFFE57373),
@@ -388,14 +368,12 @@ class _ReportsPageState extends State<ReportsPage> {
                     icon: Icon(Icons.delete, size: 18),
                     label: Text('Delete'),
                   ),
-
-                  // Review Button
                   ElevatedButton.icon(
                     onPressed: () {
                       _updateReportStatus(report['book']['_id'], report['_id']);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent, // Blue color for "Review"
+                      backgroundColor: Colors.blueAccent, 
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -414,7 +392,6 @@ class _ReportsPageState extends State<ReportsPage> {
   }
 
 
-  /// Helper function to format the date
   String _formatDate(String date) {
     final DateTime parsedDate = DateTime.parse(date);
     return "${parsedDate.day}-${parsedDate.month}-${parsedDate.year}";
