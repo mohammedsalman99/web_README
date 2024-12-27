@@ -73,15 +73,35 @@ class _HomeState extends State<Home> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(
-          _titles[_currentIndex],
-          style: const TextStyle(
-            fontFamily: 'SF-Pro-Text',
-            fontWeight: FontWeight.bold,
-          ),
+        title: Row(
+          children: [
+            CircleAvatar(
+              radius: 20,
+              backgroundImage: NetworkImage(widget.profilePicture),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.fullName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  widget.email,
+                  style: const TextStyle(
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
         backgroundColor: primaryColor,
-        centerTitle: true,
+        centerTitle: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications),
@@ -95,67 +115,34 @@ class _HomeState extends State<Home> {
             icon: const Icon(Icons.settings),
             onPressed: () {
               setState(() {
-                _currentIndex = 12; 
+                _currentIndex = 12;
               });
             },
           ),
         ],
       ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 500),
-        child: _pages[_currentIndex],
+      body: Row(
+        children: [
+          _buildSideNavigationBar(context),
+          Expanded(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              child: _pages[_currentIndex],
+            ),
+          ),
+        ],
       ),
-      drawer: _buildSideNavigationBar(context),
       backgroundColor: Colors.grey[100],
     );
   }
 
   Widget _buildSideNavigationBar(BuildContext context) {
-    return Drawer(
-      backgroundColor: primaryColor,
+    return Container(
+      width: 250,
+      color: primaryColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [secondaryColor, primaryColor],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-            ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 35,
-                  backgroundImage: NetworkImage(widget.profilePicture),
-                ),
-                const SizedBox(width: 15),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.fullName,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      widget.email,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.white70,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
           Expanded(
             child: ListView(
               children: List.generate(_titles.length, (index) {
@@ -191,7 +178,8 @@ class _HomeState extends State<Home> {
         title,
         style: TextStyle(
           color: _currentIndex == index ? highlightColor : Colors.white,
-          fontWeight: _currentIndex == index ? FontWeight.bold : FontWeight.normal,
+          fontWeight:
+          _currentIndex == index ? FontWeight.bold : FontWeight.normal,
         ),
       ),
       tileColor: _currentIndex == index ? secondaryColor : Colors.transparent,
@@ -200,7 +188,6 @@ class _HomeState extends State<Home> {
         setState(() {
           _currentIndex = index;
         });
-        Navigator.of(context).pop();
       },
     );
   }
