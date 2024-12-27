@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:web_frontend/screens/login_page.dart';
-import 'package:web_frontend/screens/splash_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -11,10 +10,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/splash',
+      initialRoute: '/login', // Directly go to the login page
       routes: {
-        '/splash': (context) => SplashScreen(),
-        '/login': (context) => LoginPage(), 
+        '/login': (context) => LoginPage(),  // Navigate to the login page
       },
     );
   }

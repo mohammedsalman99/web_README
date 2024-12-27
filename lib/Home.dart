@@ -45,7 +45,7 @@ class _HomeState extends State<Home> {
     SubscriptionPlanPage(),
     PaymentGatewayPage(),
     TransactionsPage(),
-    ReviewsPage(),
+    AllReviewsPage(),
     ReportsPage(),
     PagesPage(),
     NotificationsPage(),
