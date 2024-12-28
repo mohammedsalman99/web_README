@@ -250,7 +250,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
                   if (result != null) {
                     setState(() {
-]                      categories[index] = result;
+                 categories[index] = result;
                     });
                   }
                 },
