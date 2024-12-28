@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'dart:html' as html; // For Flutter Web
+import 'dart:html' as html; 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
@@ -12,31 +12,29 @@ class CreateCategoryPage extends StatefulWidget {
 
 class _CreateCategoryPageState extends State<CreateCategoryPage> {
   final TextEditingController _titleController = TextEditingController();
-  Uint8List? _selectedImage; // Store the image as bytes
-  bool _isVisible = true; // Default value for visibility
+  Uint8List? _selectedImage;
+  bool _isVisible = true; 
 
-  // Method to pick an image using HTML File Upload (Flutter Web)
   Future<void> _pickImage() async {
     final html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-    uploadInput.accept = 'image/*'; // Restrict file type to images
+    uploadInput.accept = 'image/*'; 
     uploadInput.click();
 
     uploadInput.onChange.listen((e) async {
       final files = uploadInput.files;
       if (files != null && files.isNotEmpty) {
         final reader = html.FileReader();
-        reader.readAsArrayBuffer(files[0]); // Read file as bytes
+        reader.readAsArrayBuffer(files[0]);
 
         reader.onLoadEnd.listen((event) {
           setState(() {
-            _selectedImage = reader.result as Uint8List; // Store the image bytes
+            _selectedImage = reader.result as Uint8List; 
           });
         });
       }
     });
   }
 
-  // Method to create the category
   Future<void> _createCategory() async {
     final String title = _titleController.text.trim();
     if (title.isEmpty || _selectedImage == null) {
@@ -54,25 +52,21 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
       final request = http.MultipartRequest('POST', Uri.parse(url));
       request.headers['Authorization'] = 'Bearer $token';
 
-      // Add fields
       request.fields['title'] = title;
 
-      // Attach the image as bytes
       final imageFileBytes = http.MultipartFile.fromBytes(
-        'image', // Field name must match the API
+        'image',
         _selectedImage!,
-        filename: 'image.jpg', // Dummy filename
+        filename: 'image.jpg',
         contentType: MediaType('image', 'jpeg'),
       );
       request.files.add(imageFileBytes);
 
-      // Debugging: Print request details
       print('Request URL: ${request.url}');
       print('Request Headers: ${request.headers}');
       print('Request Fields: ${request.fields}');
       print('Request Files: ${request.files}');
 
-      // Send request
       final response = await request.send();
       final responseBody = await http.Response.fromStream(response);
 
@@ -84,7 +78,7 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Category created successfully!')),
         );
-        Navigator.pop(context); // Go back to the previous screen
+        Navigator.pop(context); 
       } else {
         print('Failed to create category: ${responseBody.body}');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -117,14 +111,13 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 600), // Center and constrain for larger screens
+          constraints: BoxConstraints(maxWidth: 600),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title Input Section
                   Text(
                     'Category Title',
                     style: TextStyle(
@@ -165,7 +158,6 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
                   ),
                   SizedBox(height: 20),
 
-                  // Image Picker Section
                   Text(
                     'Category Image',
                     style: TextStyle(
@@ -220,7 +212,6 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
                   ),
                   SizedBox(height: 20),
 
-                  // Visibility Toggle Section
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -250,7 +241,6 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
                   ),
                   SizedBox(height: 20),
 
-                  // Create Button
                   ElevatedButton.icon(
                     onPressed: _createCategory,
                     icon: Icon(Icons.add, color: Colors.white),
@@ -280,6 +270,4 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
       ),
     );
   }
-
-
 }
