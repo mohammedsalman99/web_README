@@ -26,7 +26,6 @@ class _EditAuthorPageState extends State<EditAuthorPage> {
   late bool _isVisible;
   String? _existingProfilePicture;
 
-  // Admin token
   final String _adminToken =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro';
 
@@ -83,7 +82,6 @@ class _EditAuthorPageState extends State<EditAuthorPage> {
       return;
     }
 
-    // Check if widget.author is null or missing _id
     if (widget.author == null || widget.author['_id'] == null) {
       print("Error: widget.author or widget.author['_id'] is null.");
       ScaffoldMessenger.of(context).showSnackBar(
@@ -92,24 +90,19 @@ class _EditAuthorPageState extends State<EditAuthorPage> {
       return;
     }
 
-    // Construct the URL
     final url = 'https://readme-backend-zdiq.onrender.com/api/v1/authors/${widget.author['_id']}';
     print("Request URL: $url");
 
     try {
       final request = http.MultipartRequest('PUT', Uri.parse(url));
 
-      // Add headers
       request.headers['Authorization'] = 'Bearer $_adminToken';
       print("Authorization Header: ${request.headers['Authorization']}");
 
-      // Add fields
       request.fields['fullName'] = name;
       request.fields['bio'] = bio;
 
       print("Request Fields: ${request.fields}");
-
-      // Add the image if selected
       if (_selectedImage != null) {
         final imageFileBytes = http.MultipartFile.fromBytes(
           'profilePicture',
@@ -121,7 +114,6 @@ class _EditAuthorPageState extends State<EditAuthorPage> {
         print("Image file added to request.");
       }
 
-      // Send the request
       final response = await request.send();
       final responseBody = await http.Response.fromStream(response);
 
