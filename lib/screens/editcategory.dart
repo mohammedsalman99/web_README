@@ -1,12 +1,12 @@
 import 'dart:typed_data';
-import 'dart:html' as html; // For Flutter Web
+import 'dart:html' as html; 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
 
 class EditCategoryPage extends StatefulWidget {
-  final Map category; // The category to edit
+  final Map category; 
 
   const EditCategoryPage({required this.category});
 
@@ -17,7 +17,7 @@ class EditCategoryPage extends StatefulWidget {
 class _EditCategoryPageState extends State<EditCategoryPage> {
   late TextEditingController _titleController;
   late bool _isVisible;
-  Uint8List? _selectedImageBytes; // For web image handling
+  Uint8List? _selectedImageBytes; 
   String? _selectedImageName;
   final html.FileUploadInputElement _uploadInput = html.FileUploadInputElement();
 
@@ -25,7 +25,7 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.category['title']);
-    _isVisible = widget.category['isVisible'] ?? true; // Default to true if null
+    _isVisible = widget.category['isVisible'] ?? true; 
   }
 
   void _pickImageWeb() async {
@@ -57,21 +57,18 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
       final request = http.MultipartRequest('PUT', Uri.parse(url));
       request.headers['Authorization'] = 'Bearer $token';
 
-      // Add fields
       request.fields['title'] = _titleController.text;
       request.fields['isVisible'] = _isVisible.toString();
 
-      // Add new image if selected (web-specific)
       if (_selectedImageBytes != null) {
         request.files.add(http.MultipartFile.fromBytes(
           'image',
           _selectedImageBytes!,
           filename: _selectedImageName,
-          contentType: MediaType('image', 'jpeg'), // Adjust based on image type
+          contentType: MediaType('image', 'jpeg'),
         ));
       }
 
-      // Send request
       final response = await request.send();
       final responseBody = await http.Response.fromStream(response);
 
@@ -83,7 +80,7 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Category updated successfully')),
         );
-        Navigator.pop(context, updatedCategory); // Return updated category to the previous screen
+        Navigator.pop(context, updatedCategory); 
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to update category: ${response.statusCode}')),
@@ -122,7 +119,6 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title Input Section
                   Text(
                     'Category Title',
                     style: TextStyle(
@@ -151,7 +147,6 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
                   ),
                   SizedBox(height: 20),
 
-                  // Image Picker Section
                   Text(
                     'Category Image',
                     style: TextStyle(
@@ -164,7 +159,6 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Display Current or New Image
                       Expanded(
                         flex: 2,
                         child: Container(
@@ -203,7 +197,6 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
                       ),
                       SizedBox(width: 20),
 
-                      // Upload Icon
                       Expanded(
                         flex: 1,
                         child: GestureDetector(
@@ -228,7 +221,6 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
                   ),
                   SizedBox(height: 20),
 
-                  // Visibility Toggle Section
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -258,7 +250,6 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
                   ),
                   SizedBox(height: 20),
 
-                  // Update Button
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(25),
@@ -292,8 +283,8 @@ class _EditCategoryPageState extends State<EditCategoryPage> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
                         ),
-                        backgroundColor: Colors.transparent, // Transparent to show gradient
-                        elevation: 0, // Removes default shadow
+                        backgroundColor: Colors.transparent, 
+                        elevation: 0, 
                       ),
                     ),
                   ),
