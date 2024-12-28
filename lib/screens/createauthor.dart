@@ -21,7 +21,6 @@ class _CreateAuthorPageState extends State<CreateAuthorPage> {
   Uint8List? _selectedImage;
   bool _isVisible = true;
 
-  // Admin token
   final String _adminToken =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro';
 
@@ -62,17 +61,14 @@ class _CreateAuthorPageState extends State<CreateAuthorPage> {
     try {
       final request = http.MultipartRequest('POST', Uri.parse(url));
 
-      // Add headers
       request.headers['Authorization'] = 'Bearer $_adminToken';
       print("Authorization Header: ${request.headers['Authorization']}");
 
-      // Add fields
       request.fields['fullName'] = name;
       request.fields['bio'] = bio;
 
       print("Request Fields: ${request.fields}");
 
-      // Add image file
       final imageFileBytes = http.MultipartFile.fromBytes(
         'profilePicture',
         _selectedImage!,
@@ -82,7 +78,6 @@ class _CreateAuthorPageState extends State<CreateAuthorPage> {
       request.files.add(imageFileBytes);
       print("Image file added to request.");
 
-      // Send request
       final response = await request.send();
       final responseBody = await http.Response.fromStream(response);
 
@@ -110,9 +105,6 @@ class _CreateAuthorPageState extends State<CreateAuthorPage> {
       );
     }
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
