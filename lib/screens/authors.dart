@@ -14,7 +14,7 @@ class _AuthorsPageState extends State<AuthorsPage> {
   List<Map> authors = [];
   bool isLoading = true;
   final String _adminToken =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro'; // Replace with your actual token
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro'; 
 
   @override
   void initState() {
@@ -60,7 +60,7 @@ class _AuthorsPageState extends State<AuthorsPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Color(0xFF1A1E28), // Dark background
+        backgroundColor: Color(0xFF1A1E28), 
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -131,7 +131,7 @@ class _AuthorsPageState extends State<AuthorsPage> {
         final response = await http.delete(
           Uri.parse(url),
           headers: {
-            'Authorization': 'Bearer $_adminToken', // Admin token
+            'Authorization': 'Bearer $_adminToken', 
           },
         );
 
@@ -177,7 +177,7 @@ class _AuthorsPageState extends State<AuthorsPage> {
               setState(() {
                 isLoading = true;
               });
-              fetchAuthors(); // Refresh authors list
+              fetchAuthors(); 
             },
             tooltip: 'Refresh Authors',
           ),
@@ -300,7 +300,7 @@ class _AuthorsPageState extends State<AuthorsPage> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onEdit(context, author), // Navigate to edit page
+      onTap: () => onEdit(context, author), 
       child: Card(
         elevation: 15,
         margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
