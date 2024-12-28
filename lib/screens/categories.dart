@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:io';
 
 import 'editcategory.dart';
-import 'openCreateCategory.dart'; // For File
+import 'openCreateCategory.dart'; 
 
 
 class CategoriesPage extends StatefulWidget {
@@ -48,23 +48,18 @@ class _CategoriesPageState extends State<CategoriesPage> {
     final token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczNTMxMTE5MiwiZXhwIjoxNzQzMDg3MTkyfQ.lzAlViNODQWPGtjJ8cEBKK6zLzWcItpBmf5N5aD0laY';
 
     try {
-      // Create multipart request
       final request = http.MultipartRequest('POST', Uri.parse(url));
       request.headers['Authorization'] = 'Bearer $token';
       request.fields['title'] = title;
       request.fields['isVisible'] = isVisible.toString();
 
-      // Attach the image file
       final imageFileBytes = await http.MultipartFile.fromPath(
-        'image', // API expects the field name as "image"
+        'image',
         imageFile.path,
       );
       request.files.add(imageFileBytes);
 
-      // Send request
       final response = await request.send();
-
-      // Get response body
       final responseBody = await http.Response.fromStream(response);
 
       print('Response Status Code: ${response.statusCode}');
@@ -73,7 +68,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       if (response.statusCode == 201) {
         final newCategory = json.decode(responseBody.body)['category'];
         setState(() {
-          categories.add(newCategory); // Add new category to list
+          categories.add(newCategory); 
         });
         print('Category created successfully');
       } else {
@@ -103,7 +98,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
         print('Delete Response: $responseBody');
 
         setState(() {
-          // Remove the deleted category from the UI
           categories.removeWhere((category) => category['_id'] == categoryId);
         });
 
@@ -144,7 +138,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
         final responseBody = json.decode(response.body);
         print('Toggle Response: $responseBody');
 
-        // Update the category in the list
         setState(() {
           final index = categories.indexWhere((category) => category['_id'] == categoryId);
           if (index != -1) {
@@ -173,7 +166,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // AppBar with gradient background
       appBar: AppBar(
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -192,14 +184,13 @@ class _CategoriesPageState extends State<CategoriesPage> {
               setState(() {
                 isLoading = true;
               });
-              fetchCategories(); // Refresh categories
+              fetchCategories(); 
             },
             tooltip: 'Refresh Categories',
           ),
         ],
       ),
 
-      // Body with loading indicator or categories grid
       body: AnimatedSwitcher(
         duration: Duration(milliseconds: 500),
         child: isLoading
@@ -259,8 +250,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
 
                   if (result != null) {
                     setState(() {
-                      // Update the edited category in the list
-                      categories[index] = result;
+]                      categories[index] = result;
                     });
                   }
                 },
@@ -273,7 +263,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
         ),
       ),
 
-      // Floating Action Button with shadow and ripple effect
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
@@ -375,7 +364,7 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onEdit(context, category), // Navigate to Edit on tap
+      onTap: () => onEdit(context, category), 
       child: Card(
         elevation: 15,
         margin: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
@@ -399,7 +388,6 @@ class CategoryCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image Section with Overlay
               Expanded(
                 child: Stack(
                   children: [
@@ -416,7 +404,6 @@ class CategoryCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Gradient Overlay
                     Positioned.fill(
                       child: Container(
                         decoration: BoxDecoration(
@@ -432,7 +419,6 @@ class CategoryCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Visibility Badge
                     Positioned(
                       top: 10,
                       left: 10,
@@ -452,7 +438,6 @@ class CategoryCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Title on Image
                     Positioned(
                       bottom: 10,
                       left: 10,
@@ -477,13 +462,11 @@ class CategoryCard extends StatelessWidget {
                   ],
                 ),
               ),
-              // Details Section
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Action Buttons with Icons
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -512,7 +495,6 @@ class CategoryCard extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: 10),
-                    // Visibility Toggle
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
