@@ -100,8 +100,6 @@ class _CreateBookPageState extends State<CreateBookPage> {
     try {
       final request = http.MultipartRequest('POST', Uri.parse(url));
       request.headers['Authorization'] = 'Bearer $_adminToken';
-
-      // Add form fields
       request.fields['title'] = title;
       request.fields['category'] = selectedCategory?['_id'] ?? '';
       request.fields['authors'] = selectedAuthors.join(',');
@@ -109,12 +107,10 @@ class _CreateBookPageState extends State<CreateBookPage> {
       request.fields['bookLink'] = bookLink;
       request.fields['description'] = description;
 
-      // Only include the price if the book is not free
       if (!free) {
         request.fields['price'] = price.toString();
       }
 
-      // Add image file
       if (_selectedImage != null) {
         final imageFile = http.MultipartFile.fromBytes(
           'image',
@@ -151,10 +147,10 @@ class _CreateBookPageState extends State<CreateBookPage> {
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 800), // Limit the width for web
+          constraints: BoxConstraints(maxWidth: 800),
           child: ScrollConfiguration(
             behavior: ScrollConfiguration.of(context).copyWith(
-              scrollbars: false, // Disable scrollbars
+              scrollbars: false, 
             ),
             child: SingleChildScrollView(
               scrollDirection: Axis.vertical,
