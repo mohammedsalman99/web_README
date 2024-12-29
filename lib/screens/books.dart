@@ -14,7 +14,6 @@ class _BooksPageState extends State<BooksPage> {
   List<Map> books = [];
   bool isLoading = true;
   final String _adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro';
-  // Replace with actual token.
 
   @override
   void initState() {
@@ -54,7 +53,7 @@ class _BooksPageState extends State<BooksPage> {
     }
   }
   Future<void> removeBook(String bookId) async {
-    print('Attempting to delete book with ID: $bookId'); // Debug log
+    print('Attempting to delete book with ID: $bookId'); 
     final url = 'https://readme-backend-zdiq.onrender.com/api/v1/books/$bookId';
 
     try {
@@ -68,7 +67,7 @@ class _BooksPageState extends State<BooksPage> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('Response from server: ${data['message']}'); // Log success
+        print('Response from server: ${data['message']}'); 
         setState(() {
           books.removeWhere((book) => book['_id'] == bookId);
         });
@@ -106,7 +105,7 @@ class _BooksPageState extends State<BooksPage> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print(data['message']); // Debug log
+        print(data['message']); 
         setState(() {
           final bookIndex = books.indexWhere((b) => b['_id'] == bookId);
           if (bookIndex != -1) {
@@ -213,7 +212,6 @@ class _BooksPageState extends State<BooksPage> {
 
                   if (updatedBook != null) {
                     setState(() {
-                      // Replace the old book details with the updated ones
                       final index = books.indexWhere((b) => b['_id'] == book['_id']);
                       if (index != -1) {
                         books[index] = updatedBook;
@@ -223,10 +221,7 @@ class _BooksPageState extends State<BooksPage> {
                 },
 
                 onDelete: (bookId) async {
-                  // Call the removeBook function to delete from the backend
                   await removeBook(bookId);
-
-                  // Update the local state to remove the book from the UI
                   setState(() {
                     books.removeWhere((b) => b['_id'] == bookId);
                   });
@@ -283,7 +278,7 @@ class BookCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onEdit(context, book), // Navigate to edit page
+      onTap: () => onEdit(context, book), 
       child: Card(
         elevation: 15,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -390,9 +385,8 @@ class BookCard extends StatelessWidget {
                         ),
                         ElevatedButton.icon(
                           onPressed: () async {
-                            print('Delete button pressed for book ID: ${book['_id']}'); // Debug log
+                            print('Delete button pressed for book ID: ${book['_id']}'); 
 
-                            // Show the confirmation dialog
                             final bool? confirmDelete = await showDialog(
                               context: context,
                               builder: (BuildContext context) {
@@ -411,13 +405,13 @@ class BookCard extends StatelessWidget {
                                   actions: [
                                     TextButton(
                                       onPressed: () {
-                                        Navigator.of(context).pop(false); // Return false (cancel)
+                                        Navigator.of(context).pop(false); 
                                       },
                                       child: Text("Cancel", style: TextStyle(color: Colors.grey)),
                                     ),
                                     ElevatedButton(
                                       onPressed: () {
-                                        Navigator.of(context).pop(true); // Return true (confirm)
+                                        Navigator.of(context).pop(true); 
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.red,
@@ -429,9 +423,8 @@ class BookCard extends StatelessWidget {
                               },
                             );
 
-                            // If the user confirms, proceed with deletion
                             if (confirmDelete == true) {
-                              await onDelete(book['_id']); // Pass book ID to onDelete
+                              await onDelete(book['_id']); 
                             }
                           },
                           icon: Icon(Icons.delete, size: 18),
@@ -456,7 +449,7 @@ class BookCard extends StatelessWidget {
                             Switch(
                               value: book['isVisible'] ?? true,
                               onChanged: (value) async {
-                                print('Toggling visibility for book ID: ${book['_id']} to $value'); // Debug log
+                                print('Toggling visibility for book ID: ${book['_id']} to $value'); 
                                 await onToggleVisibility(book['_id'], book['isVisible'] ?? true);
                               },
                               activeColor: Colors.green,
