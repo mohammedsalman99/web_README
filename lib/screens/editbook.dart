@@ -379,7 +379,7 @@ class _EditBookPageState extends State<EditBookPage> {
       value: categories.isNotEmpty && selectedCategory != null
           ? categories.firstWhere(
             (category) => category['_id'] == selectedCategory?['_id'],
-        orElse: () => {}, // Return an empty Map
+        orElse: () => {}, 
       )
           : null,
       items: categories.map((category) {
