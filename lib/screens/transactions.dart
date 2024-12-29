@@ -22,7 +22,7 @@ class _TransactionTableState extends State<TransactionTable> {
   int totalPages = 1;
   int rowsPerPage = 15;
   List<dynamic> transactions = [];
-  Map<int, List<dynamic>> transactionCache = {}; // Cache for transactions
+  Map<int, List<dynamic>> transactionCache = {}; 
   bool isLoading = false;
 
   @override
@@ -34,7 +34,6 @@ class _TransactionTableState extends State<TransactionTable> {
   Future<void> fetchAndSetTransactions({int? page}) async {
     final int fetchPage = page ?? currentPage;
 
-    // If the page is cached, use it directly
     if (transactionCache.containsKey(fetchPage)) {
       setState(() {
         transactions = transactionCache[fetchPage]!;
@@ -58,7 +57,7 @@ class _TransactionTableState extends State<TransactionTable> {
         transactions = data['transactions'];
         totalPages = (data['pagination']['total'] / rowsPerPage).ceil();
         currentPage = fetchPage;
-        transactionCache[fetchPage] = transactions; // Cache the data
+        transactionCache[fetchPage] = transactions; 
       });
     } catch (e) {
       print('Error fetching transactions: $e');
@@ -109,16 +108,15 @@ class _TransactionTableState extends State<TransactionTable> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Colors.white, // White background for the page
+        color: Colors.white, 
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const SizedBox(height:8), // Add spacing instead of header
+            const SizedBox(height:8), 
 
-            // Table Section
             Expanded(
               child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.565, // Set table width to 90% of the screen width
+                width: MediaQuery.of(context).size.width * 0.565, 
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -152,8 +150,8 @@ class _TransactionTableState extends State<TransactionTable> {
                       scrollDirection: Axis.horizontal,
                       child: DataTable(
                         headingRowColor: WidgetStateProperty.all(
-                            const Color(0xFFB2EBF2)), // Secondary color for header
-                        columnSpacing: 40, // Increase column spacing for wider table
+                            const Color(0xFFB2EBF2)), 
+                        columnSpacing: 40, 
                         columns: const [
                           DataColumn(
                             label: Text(
@@ -161,7 +159,7 @@ class _TransactionTableState extends State<TransactionTable> {
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
-                                fontSize: 22, // Larger font size for header
+                                fontSize: 22,
                               ),
                             ),
                           ),
@@ -237,12 +235,12 @@ class _TransactionTableState extends State<TransactionTable> {
                                   }
                                   return index % 2 == 0
                                       ? Colors.white
-                                      : const Color(0xFFF5F5F5); // Alternate row colors
+                                      : const Color(0xFFF5F5F5);
                                 }),
                             cells: [
                               DataCell(Text(
                                 '$index',
-                                style: const TextStyle(fontSize: 16), // Larger font size for data
+                                style: const TextStyle(fontSize: 16), 
                               )),
                               DataCell(Text(
                                 transaction['user']['fullName'] ?? 'N/A',
@@ -287,7 +285,6 @@ class _TransactionTableState extends State<TransactionTable> {
               ),
             ),
 
-            // Pagination Section
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
