@@ -64,16 +64,13 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
       );
 
       if (response.statusCode == 201) {
-        // Extract the newly created plan from the response
         final Map<String, dynamic> responseData = json.decode(response.body);
         final Map<String, dynamic> newPlan = responseData['plan'];
 
-        // Add the new plan to the list and refresh UI
         setState(() {
           plans.add(newPlan);
         });
 
-        // Show a success message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Plan "${newPlan['planName']}" added successfully!'),
@@ -81,7 +78,6 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
           ),
         );
       } else {
-        // Log the status code and response body for debugging
         print('Failed to add plan: ${response.statusCode}, ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -91,7 +87,6 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
         );
       }
     } catch (e) {
-      // Catch and log any exceptions
       print('Error adding plan: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -121,11 +116,9 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
       );
 
       if (response.statusCode == 200) {
-        // Parse the updated plan from the response
         final Map<String, dynamic> responseData = json.decode(response.body);
         final Map<String, dynamic> updatedPlan = responseData['plan'];
 
-        // Update the plan in the list
         setState(() {
           final index = plans.indexWhere((plan) => plan['_id'] == id);
           if (index != -1) {
@@ -133,7 +126,6 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
           }
         });
 
-        // Show a success message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -142,7 +134,6 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
           ),
         );
       } else {
-        // Handle server errors and duplicate key error specifically
         final Map<String, dynamic> errorResponse = json.decode(response.body);
         final String errorMessage = errorResponse['error'] ??
             'Unknown error occurred';
@@ -158,7 +149,6 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
         );
       }
     } catch (e) {
-      // Catch and log any exceptions
       print('Error editing plan: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -256,17 +246,13 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
       );
 
       if (response.statusCode == 200) {
-        // Parse the response message
         final Map<String, dynamic> responseData = json.decode(response.body);
         final String message = responseData['message'] ??
             'Plan deleted successfully!';
 
-        // Update the state to remove the deleted plan
         setState(() {
           plans.removeWhere((plan) => plan['_id'] == id);
         });
-
-        // Show a success message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
@@ -274,7 +260,6 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
           ),
         );
       } else {
-        // Log the failure and show an error message
         print(
             'Failed to delete plan: ${response.statusCode}, ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -285,7 +270,6 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
         );
       }
     } catch (e) {
-      // Catch and log any exceptions
       print('Error deleting plan: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -447,7 +431,7 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
                             icon: Icon(Icons.edit, size: 16, color: Colors.white),
                             label: Text(
                               'Edit',
-                              style: TextStyle(color: Colors.white), // Set text color to white
+                              style: TextStyle(color: Colors.white), 
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue,
@@ -462,7 +446,7 @@ class _SubscriptionPlanPageState extends State<SubscriptionPlanPage> {
                             icon: Icon(Icons.delete, size: 16, color: Colors.white),
                             label: Text(
                               'Delete',
-                              style: TextStyle(color: Colors.white), // Set text color to white
+                              style: TextStyle(color: Colors.white), 
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
