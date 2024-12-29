@@ -23,10 +23,18 @@ class _CategoriesPageState extends State<CategoriesPage> {
   }
 
   Future<void> fetchCategories() async {
-    final url = 'https://readme-backend-zdiq.onrender.com/api/v1/categories';
+    final url = 'https://readme-backend-zdiq.onrender.com/api/v1/categories/all';
+    final token =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczNTMxMTE5MiwiZXhwIjoxNzQzMDg3MTkyfQ.lzAlViNODQWPGtjJ8cEBKK6zLzWcItpBmf5N5aD0laY';
 
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         setState(() {
@@ -34,12 +42,13 @@ class _CategoriesPageState extends State<CategoriesPage> {
           isLoading = false;
         });
       } else {
-        print('Failed to load categories');
+        print('Failed to load categories: ${response.statusCode}');
       }
     } catch (e) {
       print('Error fetching categories: $e');
     }
   }
+
 
 
   Future<void> createCategory(String title, File imageFile,

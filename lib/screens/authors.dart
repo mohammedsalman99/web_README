@@ -23,9 +23,16 @@ class _AuthorsPageState extends State<AuthorsPage> {
   }
 
   Future<void> fetchAuthors() async {
+    final url = 'https://readme-backend-zdiq.onrender.com/api/v1/authors/all';
+    final token = _adminToken;
+
     try {
       final response = await http.get(
-        Uri.parse('https://readme-backend-zdiq.onrender.com/api/v1/authors'),
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
       );
 
       if (response.statusCode == 200) {
@@ -35,26 +42,63 @@ class _AuthorsPageState extends State<AuthorsPage> {
           isLoading = false;
         });
       } else {
-        throw Exception('Failed to load authors');
+        print('Failed to load authors: ${response.statusCode}');
+        setState(() {
+          isLoading = false;
+        });
       }
     } catch (e) {
+      print('Error fetching authors: $e');
       setState(() {
         isLoading = false;
       });
-      print('Error fetching authors: $e');
     }
   }
 
 
 
-  void toggleVisibility(String authorId, bool isCurrentlyVisible) {
-    setState(() {
-      final index = authors.indexWhere((author) => author['_id'] == authorId);
-      if (index != -1) {
-        authors[index]['isVisible'] = !isCurrentlyVisible;
+  Future<void> toggleVisibility(String authorId, bool isCurrentlyVisible) async {
+    final url = 'https://readme-backend-zdiq.onrender.com/api/v1/authors/$authorId/visibility';
+    final token = _adminToken;
+
+    try {
+      final response = await http.patch(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({'isVisible': !isCurrentlyVisible}),
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = json.decode(response.body);
+        print('Toggle Response: $responseBody');
+
+        setState(() {
+          final index = authors.indexWhere((author) => author['_id'] == authorId);
+          if (index != -1) {
+            authors[index]['isVisible'] = responseBody['isVisible'];
+          }
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(responseBody['message'])),
+        );
+      } else {
+        print('Failed to toggle visibility: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to toggle visibility: ${response.statusCode}')),
+        );
       }
-    });
+    } catch (e) {
+      print('Error toggling visibility: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error toggling visibility: $e')),
+      );
+    }
   }
+
 
   Future<void> _showDeleteConfirmationDialog(BuildContext context, String authorId) async {
     final confirm = await showDialog<bool>(
@@ -451,6 +495,7 @@ class _AuthorsPageState extends State<AuthorsPage> {
                           inactiveThumbColor: Colors.red,
                           inactiveTrackColor: Colors.redAccent.withOpacity(0.5),
                         ),
+
                       ],
                     ),
                   ],
