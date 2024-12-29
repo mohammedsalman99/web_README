@@ -203,40 +203,16 @@ class _AuthorsPageState extends State<AuthorsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFB2EBF2), Color(0xFFE0F7FA)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-        elevation: 10,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh, color: Color(0xFF5AA5B1)),
-            onPressed: () {
-              setState(() {
-                isLoading = true;
-              });
-              fetchAuthors(); 
-            },
-            tooltip: 'Refresh Authors',
-          ),
-        ],
-      ),
       body: AnimatedSwitcher(
         duration: Duration(milliseconds: 500),
         child: isLoading
-            ? Center(
+            ? const Center(
           child: CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFB2EBF2)),
           ),
         )
             : authors.isEmpty
-            ? Center(
+            ? const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -316,9 +292,9 @@ class _AuthorsPageState extends State<AuthorsPage> {
           }
         },
         icon: Icon(Icons.add, color: Colors.white),
-        label: Text(
+        label: const Text(
           'Add Author',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white),
         ),
         backgroundColor: Color(0xFF5AA5B1),
         elevation: 10,

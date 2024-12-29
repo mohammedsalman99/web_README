@@ -133,31 +133,6 @@ class _BooksPageState extends State<BooksPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFB2EBF2), Color(0xFFE0F7FA)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-        elevation: 10,
-        title: Text('Books'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh, color: Color(0xFF5AA5B1)),
-            onPressed: () {
-              setState(() {
-                isLoading = true;
-              });
-              fetchBooks();
-            },
-            tooltip: 'Refresh Books',
-          ),
-        ],
-      ),
       body: AnimatedSwitcher(
         duration: Duration(milliseconds: 500),
         child: isLoading
@@ -248,9 +223,9 @@ class _BooksPageState extends State<BooksPage> {
           }
         },
         icon: Icon(Icons.add, color: Colors.white),
-        label: Text(
+        label: const Text(
           'Add Book',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white),
         ),
         backgroundColor: Color(0xFF5AA5B1),
         elevation: 10,
@@ -373,8 +348,11 @@ class BookCard extends StatelessWidget {
                       children: [
                         ElevatedButton.icon(
                           onPressed: () => onEdit(context, book),
-                          icon: Icon(Icons.edit, size: 18),
-                          label: Text('Edit'),
+                          icon: const Icon(Icons.edit, size: 18,color: Colors.white),
+                          label: const Text(
+                            'Edit',
+                            style: TextStyle(color: Colors.white), // Set text color to white
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blueAccent,
                             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -427,8 +405,11 @@ class BookCard extends StatelessWidget {
                               await onDelete(book['_id']); 
                             }
                           },
-                          icon: Icon(Icons.delete, size: 18),
-                          label: Text('Delete'),
+                          icon: const Icon(Icons.delete, size: 18,color: Colors.white),
+                          label: const Text(
+                            'Delete',
+                            style: TextStyle(color: Colors.white), // Set text color to white
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.redAccent,
                             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
