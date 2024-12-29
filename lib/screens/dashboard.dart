@@ -29,7 +29,7 @@ class _AdminDashboardPageState extends State<DashboardPage> {
     fetchReviewCount();
     fetchTotalReports();
     fetchPopularAndLatestBooks();
-    fetchUserCount(); // Add this line
+    fetchUserCount(); 
 
   }
 
@@ -220,7 +220,7 @@ class _AdminDashboardPageState extends State<DashboardPage> {
       final response = await http.get(
         Uri.parse(url),
         headers: {
-          'Authorization': 'Bearer $token', // Add the Authorization header
+          'Authorization': 'Bearer $token', 
         },
       );
       if (response.statusCode == 200) {
@@ -257,7 +257,7 @@ class _AdminDashboardPageState extends State<DashboardPage> {
                   TransactionCountCard(transactionCount: transactionCount),
                   ReviewCountCard(reviewCount: reviewCount),
                   ReportCountCard(reportCount: reportCount),
-                  UserCountCard(userCount: userCount), // Add this line
+                  UserCountCard(userCount: userCount), 
                 ],
               ),
 
