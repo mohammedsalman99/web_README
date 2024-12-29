@@ -16,6 +16,7 @@ class _AdminDashboardPageState extends State<DashboardPage> {
   int reportCount = 0;
   List<dynamic> popularBooks = [];
   List<dynamic> latestBooks = [];
+  int userCount = 0;
 
 
   @override
@@ -27,7 +28,8 @@ class _AdminDashboardPageState extends State<DashboardPage> {
     fetchTransactionCount();
     fetchReviewCount();
     fetchTotalReports();
-    fetchPopularAndLatestBooks(); 
+    fetchPopularAndLatestBooks();
+    fetchUserCount(); // Add this line
 
   }
 
@@ -210,6 +212,32 @@ class _AdminDashboardPageState extends State<DashboardPage> {
     }
   }
 
+  Future<void> fetchUserCount() async {
+    final url = 'https://readme-backend-zdiq.onrender.com/api/v1/users/count';
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro'; // Replace with your actual token
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token', // Add the Authorization header
+        },
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          userCount = data['count'] ?? 0;
+        });
+      } else {
+        print('Failed to fetch user count. Status Code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+    } catch (error) {
+      print('Error fetching user count: $error');
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -229,8 +257,10 @@ class _AdminDashboardPageState extends State<DashboardPage> {
                   TransactionCountCard(transactionCount: transactionCount),
                   ReviewCountCard(reviewCount: reviewCount),
                   ReportCountCard(reportCount: reportCount),
+                  UserCountCard(userCount: userCount), // Add this line
                 ],
               ),
+
               SizedBox(height: 30),
 
               SectionTitle(title: 'Popular Books'),
@@ -738,6 +768,61 @@ class BookCard extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+class UserCountCard extends StatelessWidget {
+  final int userCount;
+
+  const UserCountCard({
+    Key? key,
+    required this.userCount,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 200,
+      height: 200,
+      decoration: BoxDecoration(
+        color: Color(0xFF5AA5B1),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.people,
+            size: 50,
+            color: Colors.white,
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Users',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            userCount.toString(),
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 32,
+            ),
+          ),
+        ],
       ),
     );
   }
