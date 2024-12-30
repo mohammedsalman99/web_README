@@ -32,13 +32,10 @@ class _ChatPageState extends State<ChatPage> {
 
     setState(() {
       chats = chatData.map((chat) {
-        // Ensure 'unreadCount' and 'lastUpdated' are not null
         chat['unreadCount'] = chat['unreadCount'] ?? 0;
         chat['lastUpdated'] = chat['lastUpdated'] ?? DateTime.fromMillisecondsSinceEpoch(0).toIso8601String();
         return chat;
       }).toList();
-
-      // Sort chats by unread messages first, then by lastUpdated timestamp
       chats.sort((a, b) {
         if (b['unreadCount'] != a['unreadCount']) {
           return b['unreadCount'].compareTo(a['unreadCount']);
@@ -64,13 +61,12 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       messages = messageData;
 
-      // Find the chat and update it
       final chatIndex = chats.indexWhere((chat) => chat['userEmail'] == userEmail);
       if (chatIndex != -1) {
         final updatedChat = chats.removeAt(chatIndex);
-        updatedChat['unreadCount'] = 0; // Reset unread count on chat open
-        updatedChat['lastUpdated'] = DateTime.now().toIso8601String(); // Update timestamp
-        chats.insert(0, updatedChat); // Move to the top
+        updatedChat['unreadCount'] = 0; 
+        updatedChat['lastUpdated'] = DateTime.now().toIso8601String(); 
+        chats.insert(0, updatedChat); 
       }
       isLoading = false;
     });
@@ -100,14 +96,12 @@ class _ChatPageState extends State<ChatPage> {
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: () {
-              // Add settings functionality here
             },
           ),
         ],
       ),
       body: Row(
         children: [
-          // Sidebar to display all chats
           Container(
             width: 300,
             decoration: BoxDecoration(
@@ -187,7 +181,7 @@ class _ChatPageState extends State<ChatPage> {
                     onTap: () {
                       _fetchUserMessages(chat['userEmail']);
                       setState(() {
-                        chat['unreadCount'] = 0; // Reset unread count
+                        chat['unreadCount'] = 0; 
                       });
                     },
                   ),
@@ -197,7 +191,6 @@ class _ChatPageState extends State<ChatPage> {
             ),
           ),
           const VerticalDivider(width: 1, thickness: 1),
-          // Chat detail view
           Expanded(
             child: selectedUserEmail == null
                 ? Center(
@@ -274,7 +267,6 @@ class _ChatPageState extends State<ChatPage> {
                     },
                   ),
                 ),
-                // Input field to send messages
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
