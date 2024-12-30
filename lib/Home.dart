@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:web_frontend/screens/authors.dart';
 import 'package:web_frontend/screens/books.dart';
 import 'package:web_frontend/screens/categories.dart';
+import 'package:web_frontend/screens/chat_page.dart';
 import 'package:web_frontend/screens/dashboard.dart';
 import 'package:web_frontend/screens/notification_send.dart';
 import 'package:web_frontend/screens/pages.dart';
@@ -12,6 +13,7 @@ import 'package:web_frontend/screens/settings.dart';
 import 'package:web_frontend/screens/subscription_plan.dart';
 import 'package:web_frontend/screens/transactions.dart';
 import 'package:web_frontend/screens/users.dart';
+import 'package:web_frontend/screens/chat_service.dart'; // Chat service to handle API requests
 
 class Home extends StatefulWidget {
   final String fullName;
@@ -50,6 +52,7 @@ class _HomeState extends State<Home> {
     PagesPage(),
     NotificationsPage(),
     SettingsPage(),
+    ChatPage(), // Add ChatPage here
   ];
 
   final List<String> _titles = [
@@ -66,6 +69,7 @@ class _HomeState extends State<Home> {
     'Pages',
     'Notification Send',
     'Settings',
+    'Chat', // Add Chat title here
   ];
 
   @override
@@ -220,8 +224,11 @@ class _HomeState extends State<Home> {
         return Icons.notifications;
       case 12:
         return Icons.settings;
+      case 13:
+        return Icons.chat; // Add chat icon
       default:
         return Icons.home;
     }
   }
 }
+
