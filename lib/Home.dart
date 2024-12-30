@@ -13,7 +13,7 @@ import 'package:web_frontend/screens/settings.dart';
 import 'package:web_frontend/screens/subscription_plan.dart';
 import 'package:web_frontend/screens/transactions.dart';
 import 'package:web_frontend/screens/users.dart';
-import 'package:web_frontend/screens/chat_service.dart'; // Chat service to handle API requests
+import 'package:web_frontend/screens/chat_service.dart'; 
 
 class Home extends StatefulWidget {
   final String fullName;
@@ -52,7 +52,7 @@ class _HomeState extends State<Home> {
     PagesPage(),
     NotificationsPage(),
     SettingsPage(),
-    ChatPage(), // Add ChatPage here
+    ChatPage(), 
   ];
 
   final List<String> _titles = [
@@ -69,7 +69,7 @@ class _HomeState extends State<Home> {
     'Pages',
     'Notification Send',
     'Settings',
-    'Chat', // Add Chat title here
+    'Chat', 
   ];
 
   @override
@@ -225,7 +225,7 @@ class _HomeState extends State<Home> {
       case 12:
         return Icons.settings;
       case 13:
-        return Icons.chat; // Add chat icon
+        return Icons.chat; 
       default:
         return Icons.home;
     }
