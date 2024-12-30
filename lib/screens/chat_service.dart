@@ -10,13 +10,11 @@ class ChatService {
     "Authorization": "Bearer $adminToken",
   };
 
-  /// Sends a message from Admin to a user
-  /// Sends a message from Admin to a user
   Future<bool> sendMessageToUser(String userEmail, String message) async {
     final url = Uri.parse("$baseUrl/send");
     final body = jsonEncode({
       "message": message,
-      "userEmail": userEmail, // Correct key as per API requirements
+      "userEmail": userEmail, 
     });
 
     try {
@@ -34,8 +32,6 @@ class ChatService {
     }
   }
 
-
-  /// Fetches messages for a specific user
   Future<List<Map<String, dynamic>>> getUserMessages(String userEmail) async {
     final url = Uri.parse("$baseUrl/messages/$userEmail");
 
@@ -54,7 +50,6 @@ class ChatService {
     }
   }
 
-  /// Fetches all chats
   Future<List<Map<String, dynamic>>> getAllChats() async {
     final url = Uri.parse("$baseUrl/all");
 
