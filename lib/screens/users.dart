@@ -28,7 +28,7 @@ class _UserScreenState extends State<UserScreen> {
         final data = json.decode(response.body);
         setState(() {
           users = data['users'];
-          filteredUsers = users; // Initially, show all users
+          filteredUsers = users; 
           isLoading = false;
         });
       } else {
@@ -73,7 +73,6 @@ class _UserScreenState extends State<UserScreen> {
       ),
       body: Column(
         children: [
-          // Search Bar
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
@@ -99,7 +98,6 @@ class _UserScreenState extends State<UserScreen> {
               onChanged: filterUsers,
             ),
           ),
-          // User List
           isLoading
               ? Expanded(
             child: Center(
@@ -126,7 +124,6 @@ class _UserScreenState extends State<UserScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Profile Picture
                         CircleAvatar(
                           backgroundImage: NetworkImage(
                             user['profilePicture'] ?? '',
@@ -135,7 +132,6 @@ class _UserScreenState extends State<UserScreen> {
                           backgroundColor: Colors.white,
                         ),
                         SizedBox(width: 16),
-                        // User Info
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +167,6 @@ class _UserScreenState extends State<UserScreen> {
                             ],
                           ),
                         ),
-                        // Action Buttons
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -301,7 +296,7 @@ class _UserScreenState extends State<UserScreen> {
         setState(() {
           final index = users.indexWhere((user) => user['_id'] == userId);
           if (index != -1) users[index] = updatedUser;
-          filterUsers(searchController.text); // Re-filter after update
+          filterUsers(searchController.text); 
         });
       } else {
         throw Exception('Failed to update user');
@@ -319,7 +314,7 @@ class _UserScreenState extends State<UserScreen> {
       if (response.statusCode == 200) {
         setState(() {
           users.removeWhere((user) => user['_id'] == userId);
-          filterUsers(searchController.text); // Re-filter after delete
+          filterUsers(searchController.text); 
         });
       } else {
         throw Exception('Failed to delete user');
