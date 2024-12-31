@@ -10,9 +10,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/login', // Directly go to the login page
+      initialRoute: '/login',
       routes: {
-        '/login': (context) => LoginPage(),  // Navigate to the login page
+        '/login': (context) => LoginPage(),
       },
     );
   }
