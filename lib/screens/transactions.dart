@@ -40,7 +40,7 @@ class _TransactionTableState extends State<TransactionTable> {
     if (transactionCache.containsKey(fetchPage)) {
       setState(() {
         transactions = transactionCache[fetchPage]!;
-        filteredTransactions = transactions; // Initialize filtered list
+        filteredTransactions = transactions;
         currentPage = fetchPage;
       });
       return;
@@ -59,7 +59,7 @@ class _TransactionTableState extends State<TransactionTable> {
 
       setState(() {
         transactions = data['transactions'];
-        filteredTransactions = transactions; // Initialize filtered list
+        filteredTransactions = transactions; 
         totalPages = (data['pagination']['total'] / rowsPerPage).ceil();
         currentPage = fetchPage;
         transactionCache[fetchPage] = transactions;
@@ -128,7 +128,6 @@ class _TransactionTableState extends State<TransactionTable> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Search Bar
             Padding(
               padding: const EdgeInsets.only(bottom: 16.0),
               child: TextField(
@@ -152,7 +151,7 @@ class _TransactionTableState extends State<TransactionTable> {
                     borderSide: BorderSide(color: Color(0xFFB2EBF2), width: 2),
                   ),
                 ),
-                onChanged: filterTransactions, // Filter transactions on input
+                onChanged: filterTransactions, 
               ),
             ),
             Expanded(
