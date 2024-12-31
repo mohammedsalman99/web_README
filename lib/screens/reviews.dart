@@ -17,6 +17,9 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
 
   List<Map<String, dynamic>> _allReviews = [];
   bool _isLoading = false;
+  final TextEditingController searchController = TextEditingController();
+  List<Map<String, dynamic>> filteredReviews = [];
+
 
   @override
   void initState() {
@@ -41,6 +44,7 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
         final List<Map<String, dynamic>> books =
         List<Map<String, dynamic>>.from(booksData['books'] ?? []);
         print('Fetched ${books.length} books.');
+
         List<Future> reviewFutures = [];
 
         for (var book in books) {
@@ -58,16 +62,17 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
           ).then((reviewsResponse) {
             if (reviewsResponse.statusCode == 200) {
               final reviewsData = json.decode(reviewsResponse.body);
-              final List<Map<String, dynamic>> reviews =
+              final List<Map<String, dynamic>> bookReviews =
               List<Map<String, dynamic>>.from(reviewsData['reviews'] ?? []);
-              print('Fetched ${reviews.length} reviews for book ID: $bookId.');
+              print('Fetched ${bookReviews.length} reviews for book ID: $bookId.');
 
-              for (var review in reviews) {
-                review['book'] = book; 
+              for (var review in bookReviews) {
+                review['book'] = book;
               }
 
               setState(() {
-                _allReviews.addAll(reviews);
+                _allReviews.addAll(bookReviews);
+                filteredReviews = _allReviews; // Initialize filtered list
               });
             } else {
               print('Failed to fetch reviews for book ID: $bookId');
@@ -76,7 +81,7 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
             print('Error fetching reviews for book ID: $bookId - $e');
           });
 
-          reviewFutures.add(reviewsFuture); 
+          reviewFutures.add(reviewsFuture);
         }
 
         await Future.wait(reviewFutures);
@@ -98,16 +103,16 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
 
 
 
-  Future<void> _searchReviews(String query) async {
+
+  void _searchReviews(String query) {
     setState(() {
-      _isLoading = true;
       if (query.isEmpty) {
-        _fetchAllReviews();  
+        filteredReviews = _allReviews; // Reset to all reviews if query is empty
       } else {
-        _allReviews = _allReviews.where((review) {
-          final bookTitle = review['book']['title'].toLowerCase();
-          final userName = review['user']['fullName'].toLowerCase();
-          final reviewText = review['review'].toLowerCase();
+        filteredReviews = _allReviews.where((review) {
+          final bookTitle = review['book']?['title']?.toLowerCase() ?? '';
+          final userName = review['user']?['fullName']?.toLowerCase() ?? '';
+          final reviewText = review['review']?.toLowerCase() ?? '';
           final searchQuery = query.toLowerCase();
 
           return bookTitle.contains(searchQuery) ||
@@ -119,6 +124,7 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
   }
 
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,22 +133,29 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
         title: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: TextField(
-            onChanged: (query) {
-              _searchReviews(query); 
-            },
+            controller: searchController,
             decoration: InputDecoration(
               hintText: 'Search reviews...',
               hintStyle: TextStyle(color: Colors.grey),
               prefixIcon: Icon(Icons.search, color: Colors.teal),
-              border: InputBorder.none,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Color(0xFFB2EBF2), width: 2),
+              ),
             ),
+            onChanged: _searchReviews,
             style: TextStyle(color: Colors.black),
           ),
         ),
       ),
+
 
 
       body: RefreshIndicator(
@@ -150,12 +163,13 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
         child: _isLoading
             ? Center(child: CircularProgressIndicator())
             : ListView.builder(
-          itemCount: _allReviews.length,
+          itemCount: filteredReviews.length,
           itemBuilder: (context, index) {
-            return _buildReviewCard(_allReviews[index]);
+            return _buildReviewCard(filteredReviews[index]);
           },
         ),
       ),
+
 
     );
   }

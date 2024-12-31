@@ -43,7 +43,7 @@ class _HomeState extends State<Home> {
     CategoriesPage(),
     AuthorsPage(),
     BooksPage(),
-    UsersPage(),
+    UserScreen(),
     SubscriptionPlanPage(),
     PaymentGatewayPage(),
     TransactionTable(),

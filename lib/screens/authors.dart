@@ -13,8 +13,11 @@ class AuthorsPage extends StatefulWidget {
 class _AuthorsPageState extends State<AuthorsPage> {
   List<Map> authors = [];
   bool isLoading = true;
+  final TextEditingController searchController = TextEditingController();
+  List<Map> filteredAuthors = [];
+
   final String _adminToken =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro'; 
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro';
 
   @override
   void initState() {
@@ -39,6 +42,7 @@ class _AuthorsPageState extends State<AuthorsPage> {
         final data = json.decode(response.body);
         setState(() {
           authors = List<Map>.from(data['authors']);
+          filteredAuthors = authors; // Initialize filtered list
           isLoading = false;
         });
       } else {
@@ -55,9 +59,18 @@ class _AuthorsPageState extends State<AuthorsPage> {
     }
   }
 
+  void filterAuthors(String query) {
+    setState(() {
+      filteredAuthors = authors
+          .where((author) =>
+          author['fullName'].toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
 
 
-  Future<void> toggleVisibility(String authorId, bool isCurrentlyVisible) async {
+  Future<void> toggleVisibility(String authorId,
+      bool isCurrentlyVisible) async {
     final url = 'https://readme-backend-zdiq.onrender.com/api/v1/authors/$authorId/visibility';
     final token = _adminToken;
 
@@ -76,7 +89,8 @@ class _AuthorsPageState extends State<AuthorsPage> {
         print('Toggle Response: $responseBody');
 
         setState(() {
-          final index = authors.indexWhere((author) => author['_id'] == authorId);
+          final index = authors.indexWhere((author) =>
+          author['_id'] == authorId);
           if (index != -1) {
             authors[index]['isVisible'] = responseBody['isVisible'];
           }
@@ -88,7 +102,8 @@ class _AuthorsPageState extends State<AuthorsPage> {
       } else {
         print('Failed to toggle visibility: ${response.statusCode}');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to toggle visibility: ${response.statusCode}')),
+          SnackBar(content: Text(
+              'Failed to toggle visibility: ${response.statusCode}')),
         );
       }
     } catch (e) {
@@ -100,73 +115,75 @@ class _AuthorsPageState extends State<AuthorsPage> {
   }
 
 
-  Future<void> _showDeleteConfirmationDialog(BuildContext context, String authorId) async {
+  Future<void> _showDeleteConfirmationDialog(BuildContext context,
+      String authorId) async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Color(0xFF1A1E28), 
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.warning_amber_rounded,
-              size: 50,
-              color: Colors.orangeAccent,
+      builder: (context) =>
+          AlertDialog(
+            backgroundColor: Color(0xFF1A1E28),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-            SizedBox(height: 20),
-            Text(
-              'Are you sure?',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+            contentPadding: EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  size: 50,
+                  color: Colors.orangeAccent,
+                ),
+                SizedBox(height: 20),
+                Text(
+                  'Are you sure?',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'You will not be able to recover this.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[300],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+            actionsAlignment: MainAxisAlignment.spaceEvenly,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 10),
-            Text(
-              'You will not be able to recover this.',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[300],
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(
+                  'Yes, delete it!',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        actionsAlignment: MainAxisAlignment.spaceEvenly,
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: Colors.redAccent,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              'Yes, delete it!',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
 
     if (confirm == true) {
@@ -175,7 +192,7 @@ class _AuthorsPageState extends State<AuthorsPage> {
         final response = await http.delete(
           Uri.parse(url),
           headers: {
-            'Authorization': 'Bearer $_adminToken', 
+            'Authorization': 'Bearer $_adminToken',
           },
         );
 
@@ -197,7 +214,6 @@ class _AuthorsPageState extends State<AuthorsPage> {
       }
     }
   }
-
 
 
   @override
@@ -235,47 +251,84 @@ class _AuthorsPageState extends State<AuthorsPage> {
         )
             : Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: MediaQuery
-                  .of(context)
-                  .size
-                  .width > 800
-                  ? 4
-                  : MediaQuery
-                  .of(context)
-                  .size
-                  .width > 600
-                  ? 3
-                  : 2,
-              crossAxisSpacing: 15,
-              mainAxisSpacing: 15,
-              childAspectRatio: 0.9,
-            ),
-            itemCount: authors.length,
-            itemBuilder: (context, index) {
-              final author = authors[index];
-              return AuthorCard(
-                author: author,
-                onDelete: (context, authorId) {
-                  _showDeleteConfirmationDialog(context, authorId);
-                },
-                onEdit: (context, updatedAuthor) async {
-                  final updated = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditAuthorPage(author: author),
+          child: Column(
+            children: [
+              // Search Bar
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    labelText: 'Search Authors',
+                    labelStyle: TextStyle(color: Colors.grey),
+                    prefixIcon: Icon(Icons.search, color: Colors.grey),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
                     ),
-                  );
-                  if (updated != null) {
-                    setState(() {
-                      authors[index] = updated;
-                    });
-                  }
-                },
-                onToggleVisibility: toggleVisibility,
-              );
-            },
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Color(0xFFB2EBF2),
+                          width: 2),
+                    ),
+                  ),
+                  onChanged: filterAuthors, // Filter authors on text input
+                ),
+              ),
+              // Grid View
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: MediaQuery
+                        .of(context)
+                        .size
+                        .width > 800
+                        ? 4
+                        : MediaQuery
+                        .of(context)
+                        .size
+                        .width > 600
+                        ? 3
+                        : 2,
+                    crossAxisSpacing: 15,
+                    mainAxisSpacing: 15,
+                    childAspectRatio: 0.9,
+                  ),
+                  itemCount: filteredAuthors.length, // Use filtered list
+                  itemBuilder: (context, index) {
+                    final author = filteredAuthors[index];
+                    return AuthorCard(
+                      author: author,
+                      onDelete: (context, authorId) {
+                        _showDeleteConfirmationDialog(context, authorId);
+                      },
+                      onEdit: (context, updatedAuthor) async {
+                        final updated = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                EditAuthorPage(author: author),
+                          ),
+                        );
+                        if (updated != null) {
+                          setState(() {
+                            authors[index] = updated;
+                            filterAuthors(searchController.text); // Re-filter
+                          });
+                        }
+                      },
+                      onToggleVisibility: toggleVisibility,
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -288,13 +341,18 @@ class _AuthorsPageState extends State<AuthorsPage> {
           if (newAuthor != null) {
             setState(() {
               authors.add(newAuthor);
+              filterAuthors(searchController.text); // Re-filter after adding
             });
           }
         },
         icon: Icon(Icons.add, color: Colors.white),
         label: const Text(
           'Add Author',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         backgroundColor: Color(0xFF5AA5B1),
         elevation: 10,

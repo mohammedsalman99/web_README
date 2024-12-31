@@ -15,6 +15,9 @@ class CategoriesPage extends StatefulWidget {
 class _CategoriesPageState extends State<CategoriesPage> {
   List categories = [];
   bool isLoading = true;
+  final TextEditingController searchController = TextEditingController();
+  List filteredCategories = [];
+
 
   @override
   void initState() {
@@ -39,6 +42,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
         final data = json.decode(response.body);
         setState(() {
           categories = data['categories'];
+          filteredCategories = categories; // Initialize filteredCategories
           isLoading = false;
         });
       } else {
@@ -48,8 +52,14 @@ class _CategoriesPageState extends State<CategoriesPage> {
       print('Error fetching categories: $e');
     }
   }
-
-
+  void filterCategories(String query) {
+    setState(() {
+      filteredCategories = categories
+          .where((category) =>
+          category['title'].toString().toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
 
   Future<void> createCategory(String title, File imageFile,
       bool isVisible) async {
@@ -175,7 +185,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: AnimatedSwitcher(
         duration: Duration(milliseconds: 500),
         child: isLoading
@@ -208,46 +217,80 @@ class _CategoriesPageState extends State<CategoriesPage> {
         )
             : Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: MediaQuery.of(context).size.width > 800
-                  ? 4
-                  : MediaQuery.of(context).size.width > 600
-                  ? 3
-                  : 2,
-              crossAxisSpacing: 15,
-              mainAxisSpacing: 15,
-              childAspectRatio: 0.9,
-            ),
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              final category = categories[index];
-              return CategoryCard(
-                category: category,
-                onDelete: _showDeleteConfirmationDialog,
-                onEdit: (context, updatedCategory) async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditCategoryPage(category: category),
+          child: Column(
+            children: [
+              // Search Bar
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    labelText: 'Search Categories',
+                    labelStyle: TextStyle(color: Colors.grey),
+                    prefixIcon: Icon(Icons.search, color: Colors.grey),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
                     ),
-                  );
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Color(0xFFB2EBF2), width: 2),
+                    ),
+                  ),
+                  onChanged: filterCategories, // Call the filter method
+                ),
+              ),
+              // Grid View
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: MediaQuery.of(context).size.width > 800
+                        ? 4
+                        : MediaQuery.of(context).size.width > 600
+                        ? 3
+                        : 2,
+                    crossAxisSpacing: 15,
+                    mainAxisSpacing: 15,
+                    childAspectRatio: 0.9,
+                  ),
+                  itemCount: filteredCategories.length, // Use filtered list
+                  itemBuilder: (context, index) {
+                    final category = filteredCategories[index];
+                    return CategoryCard(
+                      category: category,
+                      onDelete: _showDeleteConfirmationDialog,
+                      onEdit: (context, updatedCategory) async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditCategoryPage(category: category),
+                          ),
+                        );
 
-                  if (result != null) {
-                    setState(() {
-                 categories[index] = result;
-                    });
-                  }
-                },
-                onToggleVisibility: (categoryId, isCurrentlyVisible) {
-                  toggleVisibility(categoryId, isCurrentlyVisible);
-                },
-              );
-            },
+                        if (result != null) {
+                          setState(() {
+                            categories[index] = result;
+                            filterCategories(searchController.text); // Re-filter
+                          });
+                        }
+                      },
+                      onToggleVisibility: (categoryId, isCurrentlyVisible) {
+                        toggleVisibility(categoryId, isCurrentlyVisible);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),
-
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
@@ -258,7 +301,11 @@ class _CategoriesPageState extends State<CategoriesPage> {
         icon: Icon(Icons.add, color: Colors.white),
         label: const Text(
           'Add Category',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         backgroundColor: Color(0xFF5AA5B1),
         elevation: 10,
@@ -266,6 +313,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       ),
     );
   }
+
 
 
 

@@ -13,6 +13,9 @@ class BooksPage extends StatefulWidget {
 class _BooksPageState extends State<BooksPage> {
   List<Map> books = [];
   bool isLoading = true;
+  final TextEditingController searchController = TextEditingController();
+  List<Map> filteredBooks = [];
+
   final String _adminToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro';
 
   @override
@@ -37,6 +40,7 @@ class _BooksPageState extends State<BooksPage> {
         final data = json.decode(response.body);
         setState(() {
           books = List<Map>.from(data['books']);
+          filteredBooks = books; // Initialize filteredBooks
           isLoading = false;
         });
       } else {
@@ -52,6 +56,24 @@ class _BooksPageState extends State<BooksPage> {
       });
     }
   }
+
+  void filterBooks(String query) {
+    setState(() {
+      filteredBooks = books
+          .where((book) {
+        final title = book['title']?.toLowerCase() ?? '';
+        final authors = (book['authors'] as List<dynamic>?)
+            ?.map((author) => author['fullName']?.toLowerCase() ?? '')
+            .toList();
+        return title.contains(query.toLowerCase()) ||
+            (authors?.any((author) => author.contains(query.toLowerCase())) ?? false);
+      })
+          .toList();
+    });
+  }
+
+
+
   Future<void> removeBook(String bookId) async {
     print('Attempting to delete book with ID: $bookId'); 
     final url = 'https://readme-backend-zdiq.onrender.com/api/v1/books/$bookId';
@@ -136,13 +158,13 @@ class _BooksPageState extends State<BooksPage> {
       body: AnimatedSwitcher(
         duration: Duration(milliseconds: 500),
         child: isLoading
-            ? Center(
+            ? const Center(
           child: CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFB2EBF2)),
           ),
         )
             : books.isEmpty
-            ? Center(
+            ? const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -160,53 +182,86 @@ class _BooksPageState extends State<BooksPage> {
           ),
         )
             : Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: MediaQuery.of(context).size.width > 800
-                  ? 4
-                  : MediaQuery.of(context).size.width > 600
-                  ? 3
-                  : 2,
-              crossAxisSpacing: 15,
-              mainAxisSpacing: 15,
-              childAspectRatio: 0.9,
-            ),
-            itemCount: books.length,
-            itemBuilder: (context, index) {
-              final book = books[index];
-              return BookCard(
-                book: book,
-                onEdit: (context, book) async {
-                  final updatedBook = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => EditBookPage(bookId: book['_id']),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Column(
+            children: [
+              // Search Bar
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
+                    labelText: 'Search Books',
+                    labelStyle: TextStyle(color: Colors.grey),
+                    prefixIcon: Icon(Icons.search, color: Colors.grey),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
                     ),
-                  );
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Color(0xFFB2EBF2), width: 2),
+                    ),
+                  ),
+                  onChanged: filterBooks, // Filter books on input
+                ),
+              ),
+              // Grid View
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: MediaQuery.of(context).size.width > 800
+                        ? 4
+                        : MediaQuery.of(context).size.width > 600
+                        ? 3
+                        : 2,
+                    crossAxisSpacing: 15,
+                    mainAxisSpacing: 15,
+                    childAspectRatio: 0.9,
+                  ),
+                  itemCount: filteredBooks.length, // Use filteredBooks
+                  itemBuilder: (context, index) {
+                    final book = filteredBooks[index];
+                    return BookCard(
+                      book: book,
+                      onEdit: (context, book) async {
+                        final updatedBook = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                EditBookPage(bookId: book['_id']),
+                          ),
+                        );
 
-                  if (updatedBook != null) {
-                    setState(() {
-                      final index = books.indexWhere((b) => b['_id'] == book['_id']);
-                      if (index != -1) {
-                        books[index] = updatedBook;
-                      }
-                    });
-                  }
-                },
-
-                onDelete: (bookId) async {
-                  await removeBook(bookId);
-                  setState(() {
-                    books.removeWhere((b) => b['_id'] == bookId);
-                  });
-                },
-
-                onToggleVisibility: (bookId, currentVisibility) async {
-                  await toggleVisibility(bookId, currentVisibility);
-                },
-              );
-            },
+                        if (updatedBook != null) {
+                          setState(() {
+                            final index = books.indexWhere(
+                                    (b) => b['_id'] == book['_id']);
+                            if (index != -1) {
+                              books[index] = updatedBook;
+                              filterBooks(searchController.text); // Re-filter
+                            }
+                          });
+                        }
+                      },
+                      onDelete: (bookId) async {
+                        await removeBook(bookId);
+                        filterBooks(searchController.text); // Re-filter
+                      },
+                      onToggleVisibility: (bookId, currentVisibility) async {
+                        await toggleVisibility(bookId, currentVisibility);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -219,21 +274,26 @@ class _BooksPageState extends State<BooksPage> {
           if (newBook != null) {
             setState(() {
               books.add(newBook);
+              filterBooks(searchController.text); // Re-filter
             });
           }
         },
         icon: Icon(Icons.add, color: Colors.white),
         label: const Text(
           'Add Book',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,color: Colors.white),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         backgroundColor: Color(0xFF5AA5B1),
         elevation: 10,
         tooltip: 'Add Book',
       ),
-
     );
   }
+
 }
 
 

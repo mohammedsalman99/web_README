@@ -19,10 +19,13 @@ class _TransactionTableState extends State<TransactionTable> {
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro';
 
   int currentPage = 1;
+  final TextEditingController searchController = TextEditingController();
+  List<dynamic> filteredTransactions = [];
+
   int totalPages = 1;
   int rowsPerPage = 15;
   List<dynamic> transactions = [];
-  Map<int, List<dynamic>> transactionCache = {}; 
+  Map<int, List<dynamic>> transactionCache = {};
   bool isLoading = false;
 
   @override
@@ -37,6 +40,7 @@ class _TransactionTableState extends State<TransactionTable> {
     if (transactionCache.containsKey(fetchPage)) {
       setState(() {
         transactions = transactionCache[fetchPage]!;
+        filteredTransactions = transactions; // Initialize filtered list
         currentPage = fetchPage;
       });
       return;
@@ -55,9 +59,10 @@ class _TransactionTableState extends State<TransactionTable> {
 
       setState(() {
         transactions = data['transactions'];
+        filteredTransactions = transactions; // Initialize filtered list
         totalPages = (data['pagination']['total'] / rowsPerPage).ceil();
         currentPage = fetchPage;
-        transactionCache[fetchPage] = transactions; 
+        transactionCache[fetchPage] = transactions;
       });
     } catch (e) {
       print('Error fetching transactions: $e');
@@ -66,6 +71,17 @@ class _TransactionTableState extends State<TransactionTable> {
         isLoading = false;
       });
     }
+  }
+  void filterTransactions(String query) {
+    setState(() {
+      filteredTransactions = transactions
+          .where((transaction) =>
+      (transaction['user']?['fullName']?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
+          (transaction['type']?.toLowerCase().contains(query.toLowerCase()) ?? false) ||
+          (transaction['amount']?.toString().contains(query) ?? false) ||
+          (transaction['paymentDate']?.toLowerCase().contains(query.toLowerCase()) ?? false))
+          .toList();
+    });
   }
 
   Future<Map<String, dynamic>> fetchTransactions({
@@ -108,15 +124,40 @@ class _TransactionTableState extends State<TransactionTable> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: Colors.white, 
+        color: Colors.white,
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const SizedBox(height:8), 
-
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: TextField(
+                controller: searchController,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  labelText: 'Search Transactions',
+                  labelStyle: TextStyle(color: Colors.grey),
+                  prefixIcon: Icon(Icons.search, color: Colors.grey),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Color(0xFFB2EBF2), width: 2),
+                  ),
+                ),
+                onChanged: filterTransactions, // Filter transactions on input
+              ),
+            ),
             Expanded(
               child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.565, 
+                width: MediaQuery.of(context).size.width * 0.565,
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -134,7 +175,7 @@ class _TransactionTableState extends State<TransactionTable> {
                       ? const Center(
                     child: CircularProgressIndicator(),
                   )
-                      : transactions.isEmpty
+                      : filteredTransactions.isEmpty
                       ? const Center(
                     child: Text(
                       'No transactions found',
@@ -150,8 +191,8 @@ class _TransactionTableState extends State<TransactionTable> {
                       scrollDirection: Axis.horizontal,
                       child: DataTable(
                         headingRowColor: WidgetStateProperty.all(
-                            const Color(0xFFB2EBF2)), 
-                        columnSpacing: 40, 
+                            const Color(0xFFB2EBF2)),
+                        columnSpacing: 40,
                         columns: const [
                           DataColumn(
                             label: Text(
@@ -224,26 +265,26 @@ class _TransactionTableState extends State<TransactionTable> {
                             ),
                           ),
                         ],
-                        rows: transactions.asMap().entries.map((entry) {
+                        rows: filteredTransactions.asMap().entries.map((entry) {
                           int index = entry.key + 1 + (currentPage - 1) * rowsPerPage;
                           var transaction = entry.value;
+
                           return DataRow(
                             color: WidgetStateProperty.resolveWith<Color>(
-                                    (Set<WidgetState> states) {
-                                  if (states.contains(WidgetState.hovered)) {
-                                    return const Color(0xFFE0F7FA);
-                                  }
-                                  return index % 2 == 0
-                                      ? Colors.white
-                                      : const Color(0xFFF5F5F5);
-                                }),
+                                  (Set<WidgetState> states) {
+                                if (states.contains(WidgetState.hovered)) {
+                                  return const Color(0xFFE0F7FA);
+                                }
+                                return index % 2 == 0 ? Colors.white : const Color(0xFFF5F5F5);
+                              },
+                            ),
                             cells: [
                               DataCell(Text(
                                 '$index',
-                                style: const TextStyle(fontSize: 16), 
+                                style: const TextStyle(fontSize: 16),
                               )),
                               DataCell(Text(
-                                transaction['user']['fullName'] ?? 'N/A',
+                                transaction['user']?['fullName'] ?? 'Unknown User',
                                 style: const TextStyle(fontSize: 18),
                               )),
                               DataCell(Text(
@@ -251,28 +292,26 @@ class _TransactionTableState extends State<TransactionTable> {
                                 style: const TextStyle(fontSize: 18),
                               )),
                               DataCell(Text(
-                                '\$${transaction['amount']}',
+                                '\$${transaction['amount'] ?? 0}',
                                 style: const TextStyle(fontSize: 18),
                               )),
                               DataCell(
                                 Chip(
                                   label: Text(
-                                    transaction['status'],
-                                    style: const TextStyle(
-                                        color: Colors.white, fontSize: 16),
+                                    transaction['status'] ?? 'Unknown',
+                                    style: const TextStyle(color: Colors.white, fontSize: 16),
                                   ),
-                                  backgroundColor:
-                                  transaction['status'] == 'COMPLETED'
+                                  backgroundColor: transaction['status'] == 'COMPLETED'
                                       ? Colors.green
                                       : Colors.red,
                                 ),
                               ),
                               DataCell(Text(
-                                transaction['paymentDate'].split('T')[0],
+                                transaction['paymentDate']?.split('T')[0] ?? 'Unknown Date',
                                 style: const TextStyle(fontSize: 18),
                               )),
                               DataCell(Text(
-                                transaction['paymentMethod'] ?? 'Unknown',
+                                transaction['paymentMethod'] ?? 'Unknown Method',
                                 style: const TextStyle(fontSize: 18),
                               )),
                             ],
@@ -284,7 +323,6 @@ class _TransactionTableState extends State<TransactionTable> {
                 ),
               ),
             ),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -303,8 +341,7 @@ class _TransactionTableState extends State<TransactionTable> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       ),
                       child: const Text(
                         'Previous',
@@ -321,8 +358,7 @@ class _TransactionTableState extends State<TransactionTable> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       ),
                       child: const Text(
                         'Next',
@@ -338,5 +374,6 @@ class _TransactionTableState extends State<TransactionTable> {
       ),
     );
   }
+
 
 }
