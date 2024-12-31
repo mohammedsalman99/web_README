@@ -40,7 +40,7 @@ class _BooksPageState extends State<BooksPage> {
         final data = json.decode(response.body);
         setState(() {
           books = List<Map>.from(data['books']);
-          filteredBooks = books; // Initialize filteredBooks
+          filteredBooks = books; 
           isLoading = false;
         });
       } else {
@@ -185,7 +185,6 @@ class _BooksPageState extends State<BooksPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             children: [
-              // Search Bar
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: TextField(
@@ -209,10 +208,9 @@ class _BooksPageState extends State<BooksPage> {
                       borderSide: BorderSide(color: Color(0xFFB2EBF2), width: 2),
                     ),
                   ),
-                  onChanged: filterBooks, // Filter books on input
+                  onChanged: filterBooks, 
                 ),
               ),
-              // Grid View
               Expanded(
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -225,7 +223,7 @@ class _BooksPageState extends State<BooksPage> {
                     mainAxisSpacing: 15,
                     childAspectRatio: 0.9,
                   ),
-                  itemCount: filteredBooks.length, // Use filteredBooks
+                  itemCount: filteredBooks.length, 
                   itemBuilder: (context, index) {
                     final book = filteredBooks[index];
                     return BookCard(
@@ -245,14 +243,14 @@ class _BooksPageState extends State<BooksPage> {
                                     (b) => b['_id'] == book['_id']);
                             if (index != -1) {
                               books[index] = updatedBook;
-                              filterBooks(searchController.text); // Re-filter
+                              filterBooks(searchController.text); 
                             }
                           });
                         }
                       },
                       onDelete: (bookId) async {
                         await removeBook(bookId);
-                        filterBooks(searchController.text); // Re-filter
+                        filterBooks(searchController.text); 
                       },
                       onToggleVisibility: (bookId, currentVisibility) async {
                         await toggleVisibility(bookId, currentVisibility);
@@ -274,7 +272,7 @@ class _BooksPageState extends State<BooksPage> {
           if (newBook != null) {
             setState(() {
               books.add(newBook);
-              filterBooks(searchController.text); // Re-filter
+              filterBooks(searchController.text); 
             });
           }
         },
@@ -411,7 +409,7 @@ class BookCard extends StatelessWidget {
                           icon: const Icon(Icons.edit, size: 18,color: Colors.white),
                           label: const Text(
                             'Edit',
-                            style: TextStyle(color: Colors.white), // Set text color to white
+                            style: TextStyle(color: Colors.white),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blueAccent,
@@ -468,7 +466,7 @@ class BookCard extends StatelessWidget {
                           icon: const Icon(Icons.delete, size: 18,color: Colors.white),
                           label: const Text(
                             'Delete',
-                            style: TextStyle(color: Colors.white), // Set text color to white
+                            style: TextStyle(color: Colors.white), 
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.redAccent,
