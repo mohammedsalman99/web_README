@@ -72,7 +72,7 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
 
               setState(() {
                 _allReviews.addAll(bookReviews);
-                filteredReviews = _allReviews; // Initialize filtered list
+                filteredReviews = _allReviews; 
               });
             } else {
               print('Failed to fetch reviews for book ID: $bookId');
@@ -107,7 +107,7 @@ class _AllReviewsPageState extends State<AllReviewsPage> {
   void _searchReviews(String query) {
     setState(() {
       if (query.isEmpty) {
-        filteredReviews = _allReviews; // Reset to all reviews if query is empty
+        filteredReviews = _allReviews; 
       } else {
         filteredReviews = _allReviews.where((review) {
           final bookTitle = review['book']?['title']?.toLowerCase() ?? '';
