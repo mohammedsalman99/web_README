@@ -42,7 +42,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
         final data = json.decode(response.body);
         setState(() {
           categories = data['categories'];
-          filteredCategories = categories; // Initialize filteredCategories
+          filteredCategories = categories; 
           isLoading = false;
         });
       } else {
@@ -243,10 +243,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       borderSide: BorderSide(color: Color(0xFFB2EBF2), width: 2),
                     ),
                   ),
-                  onChanged: filterCategories, // Call the filter method
+                  onChanged: filterCategories, 
                 ),
               ),
-              // Grid View
               Expanded(
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -259,7 +258,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     mainAxisSpacing: 15,
                     childAspectRatio: 0.9,
                   ),
-                  itemCount: filteredCategories.length, // Use filtered list
+                  itemCount: filteredCategories.length, 
                   itemBuilder: (context, index) {
                     final category = filteredCategories[index];
                     return CategoryCard(
@@ -276,7 +275,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                         if (result != null) {
                           setState(() {
                             categories[index] = result;
-                            filterCategories(searchController.text); // Re-filter
+                            filterCategories(searchController.text); 
                           });
                         }
                       },
