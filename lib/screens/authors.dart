@@ -42,7 +42,7 @@ class _AuthorsPageState extends State<AuthorsPage> {
         final data = json.decode(response.body);
         setState(() {
           authors = List<Map>.from(data['authors']);
-          filteredAuthors = authors; // Initialize filtered list
+          filteredAuthors = authors; 
           isLoading = false;
         });
       } else {
@@ -278,10 +278,9 @@ class _AuthorsPageState extends State<AuthorsPage> {
                           width: 2),
                     ),
                   ),
-                  onChanged: filterAuthors, // Filter authors on text input
+                  onChanged: filterAuthors, 
                 ),
               ),
-              // Grid View
               Expanded(
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -300,7 +299,7 @@ class _AuthorsPageState extends State<AuthorsPage> {
                     mainAxisSpacing: 15,
                     childAspectRatio: 0.9,
                   ),
-                  itemCount: filteredAuthors.length, // Use filtered list
+                  itemCount: filteredAuthors.length,
                   itemBuilder: (context, index) {
                     final author = filteredAuthors[index];
                     return AuthorCard(
@@ -319,7 +318,7 @@ class _AuthorsPageState extends State<AuthorsPage> {
                         if (updated != null) {
                           setState(() {
                             authors[index] = updated;
-                            filterAuthors(searchController.text); // Re-filter
+                            filterAuthors(searchController.text); 
                           });
                         }
                       },
@@ -341,7 +340,7 @@ class _AuthorsPageState extends State<AuthorsPage> {
           if (newAuthor != null) {
             setState(() {
               authors.add(newAuthor);
-              filterAuthors(searchController.text); // Re-filter after adding
+              filterAuthors(searchController.text); 
             });
           }
         },
