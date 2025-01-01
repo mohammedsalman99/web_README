@@ -43,8 +43,7 @@ class _AdminDashboardPageState extends State<DashboardPage> {
 
   Future<List<PieChartData>> fetchGenderData() async {
     const url = 'https://readme-backend-zdiq.onrender.com/api/v1/users/all';
-    const String token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro'; // Replace with your admin token
-
+    const String token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro'; 
     try {
       final response = await http.get(Uri.parse(url), headers: {
         'Authorization': 'Bearer $token',
@@ -93,8 +92,6 @@ class _AdminDashboardPageState extends State<DashboardPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final List<dynamic> books = data['books'];
-
-        // Sort books by views and get the top 5
         final sortedBooks = books
             .where((book) => book['isVisible'] == true)
             .toList()
@@ -277,7 +274,6 @@ class _AdminDashboardPageState extends State<DashboardPage> {
         final data = json.decode(response.body);
         final List<dynamic> reports = data['reports'];
 
-        // Count reports per book
         Map<String, int> reportCounts = {};
         Map<String, String> bookTitles = {};
 
@@ -288,7 +284,6 @@ class _AdminDashboardPageState extends State<DashboardPage> {
           bookTitles[bookId] = bookTitle;
         }
 
-        // Sort by report count and get top 3
         final sortedBooks = reportCounts.entries.toList()
           ..sort((a, b) => b.value.compareTo(a.value));
 
@@ -398,7 +393,6 @@ class _AdminDashboardPageState extends State<DashboardPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Count Cards Section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -413,7 +407,6 @@ class _AdminDashboardPageState extends State<DashboardPage> {
               ),
               SizedBox(height: 30),
 
-              // Gender Distribution Chart Section
               SectionTitle(title: 'Gender Distribution'),
               Container(
                 padding: EdgeInsets.all(16),
@@ -468,7 +461,6 @@ class _AdminDashboardPageState extends State<DashboardPage> {
               ),
               SizedBox(height: 30),
 
-              // Top Viewed Books Chart Section
               SectionTitle(title: 'Top 5 Most Viewed Books'),
               Container(
                 padding: EdgeInsets.all(16),
@@ -554,7 +546,6 @@ class _AdminDashboardPageState extends State<DashboardPage> {
               ),
               SizedBox(height: 30),
 
-              // Transaction Types Chart Section
               SectionTitle(title: 'Transaction Type Overview'),
               Container(
                 padding: EdgeInsets.all(16),
@@ -624,7 +615,6 @@ class _AdminDashboardPageState extends State<DashboardPage> {
               ),
               SizedBox(height: 30),
 
-              // Top Reported Books Chart Section
               SectionTitle(title: 'Top 3 Reported Books'),
               Container(
                 padding: EdgeInsets.all(16),
@@ -1131,8 +1121,8 @@ class UserCountCard extends StatelessWidget {
   }
 }
 class PieChartData {
-  final String category; // e.g., "Male", "Female"
-  final int value; // e.g., number of users
+  final String category; 
+  final int value; 
 
   PieChartData({required this.category, required this.value});
 }
