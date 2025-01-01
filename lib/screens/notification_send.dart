@@ -13,7 +13,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   String _title = '';
   String _body = '';
   String _imageUrl = '';
-  String _endpoint = 'send/all'; // Default endpoint
+  String _endpoint = 'send/all'; 
   String _responseMessage = '';
 
   Future<void> _sendNotification() async {
