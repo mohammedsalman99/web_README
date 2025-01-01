@@ -23,7 +23,7 @@ class _TransactionTableState extends State<TransactionTable> {
   List<dynamic> filteredTransactions = [];
 
   int totalPages = 1;
-  int rowsPerPage = 15;
+  int rowsPerPage = 14;
   List<dynamic> transactions = [];
   Map<int, List<dynamic>> transactionCache = {};
   bool isLoading = false;

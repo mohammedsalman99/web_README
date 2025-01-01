@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:syncfusion_flutter_charts/charts.dart';
+
 
 class DashboardPage extends StatefulWidget {
   @override
@@ -28,41 +30,140 @@ class _AdminDashboardPageState extends State<DashboardPage> {
     fetchTransactionCount();
     fetchReviewCount();
     fetchTotalReports();
-    fetchPopularAndLatestBooks();
-    fetchUserCount(); 
-
+    fetchUserCount();
+    fetchTransactionTypeCounts();
+    fetchTopReportedBooks();
+    fetchTopViewedBooks();
+    fetchGenderData();
   }
+  Map<String, int> transactionTypeCounts = {
+    'BOOK_PURCHASE': 0,
+    'SUBSCRIPTION': 0,
+  };
 
-  Future<void> fetchPopularAndLatestBooks() async {
-    final url = 'https://readme-backend-zdiq.onrender.com/api/v1/books';
+  Future<List<PieChartData>> fetchGenderData() async {
+    const url = 'https://readme-backend-zdiq.onrender.com/api/v1/users/all';
+    const String token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro'; // Replace with your admin token
 
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(Uri.parse(url), headers: {
+        'Authorization': 'Bearer $token',
+      });
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final books = data['books'] ?? [];
+        final users = data['users'] as List;
 
-        popularBooks = List.from(books)
-          ..sort((a, b) => (b['numberOfViews'] ?? 0).compareTo(a['numberOfViews'] ?? 0));
+        int maleCount = 0;
+        int femaleCount = 0;
 
-        latestBooks = List.from(books)
-          ..sort((a, b) => DateTime.parse(b['createdAt']).compareTo(DateTime.parse(a['createdAt'])));
+        for (var user in users) {
+          if (user['gender'] == 'male') maleCount++;
+          if (user['gender'] == 'female') femaleCount++;
+        }
 
-        popularBooks = popularBooks.take(10).toList();
-        latestBooks = latestBooks.take(10).toList();
+        return [
+          PieChartData(category: 'Male', value: maleCount),
+          PieChartData(category: 'Female', value: femaleCount),
+        ];
+      } else {
+        throw Exception('Failed to fetch gender data');
+      }
+    } catch (e) {
+      print(e);
+      throw Exception('Error fetching gender data');
+    }
+  }
 
-        setState(() {}); 
+
+  Future<List<Map<String, dynamic>>> fetchTopViewedBooks() async {
+    const String url = 'https://readme-backend-zdiq.onrender.com/api/v1/books/all';
+    const String token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro'; // Replace with your admin token
+    List<Map<String, dynamic>> topBooks = [];
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> books = data['books'];
+
+        // Sort books by views and get the top 5
+        final sortedBooks = books
+            .where((book) => book['isVisible'] == true)
+            .toList()
+          ..sort((a, b) => b['numberOfViews'].compareTo(a['numberOfViews']));
+
+        topBooks = sortedBooks.take(5).map((book) {
+          return {
+            'title': book['title'],
+            'views': book['numberOfViews'],
+          };
+        }).toList();
       } else {
         print('Failed to fetch books. Status Code: ${response.statusCode}');
       }
     } catch (error) {
       print('Error fetching books: $error');
     }
+
+    return topBooks;
+  }
+
+
+
+  Future<void> fetchTransactionTypeCounts() async {
+    final String url =
+        'https://readme-backend-zdiq.onrender.com/api/v1/transactions/admin/all?&status=COMPLETED&startDate=2024-01-01&endDate=2025-12-31&limit=100&page=1';
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> transactions = data['transactions'];
+
+        int purchaseCount = 0;
+        int subscriptionCount = 0;
+
+        for (var transaction in transactions) {
+          String type = transaction['type'];
+          if (type == 'BOOK_PURCHASE') {
+            purchaseCount++;
+          } else if (type == 'SUBSCRIPTION') {
+            subscriptionCount++;
+          }
+        }
+
+        setState(() {
+          transactionTypeCounts = {
+            'BOOK_PURCHASE': purchaseCount,
+            'SUBSCRIPTION': subscriptionCount,
+          };
+        });
+      } else {
+        print('Failed to fetch transaction types. Status Code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error fetching transaction types: $error');
+    }
   }
 
   Future<void> fetchTransactionCount() async {
     final url =
-        'https://readme-backend-zdiq.onrender.com/api/v1/transactions/admin/all?type=SUBSCRIPTION&status=COMPLETED&startDate=2024-01-01&endDate=2025-12-31&limit=10&page=1';
+        'https://readme-backend-zdiq.onrender.com/api/v1/transactions/admin/all?&status=COMPLETED&startDate=2024-01-01&endDate=2025-12-31&limit=100&page=1';
 
     try {
       final response = await http.get(
@@ -158,6 +259,55 @@ class _AdminDashboardPageState extends State<DashboardPage> {
     }
   }
 
+  Future<List<Map<String, dynamic>>> fetchTopReportedBooks() async {
+    const String url = 'https://readme-backend-zdiq.onrender.com/api/v1/books/:bookId/reports';
+    const String token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MzkzMDZjZDU0OTI2NDI5ODg4MTY0ZCIsImlzQWRtaW4iOnRydWUsImlhdCI6MTczMzM4MzMyMCwiZXhwIjoxNzQxMTU5MzIwfQ.Lzl05Sx4-xm0DCUVPPPAQUtr6A2WB6gk4CXoQd1L8ro'; // Replace with your admin token
+    List<Map<String, dynamic>> bookReports = [];
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> reports = data['reports'];
+
+        // Count reports per book
+        Map<String, int> reportCounts = {};
+        Map<String, String> bookTitles = {};
+
+        for (var report in reports) {
+          final bookId = report['book']['_id'];
+          final bookTitle = report['book']['title'];
+          reportCounts[bookId] = (reportCounts[bookId] ?? 0) + 1;
+          bookTitles[bookId] = bookTitle;
+        }
+
+        // Sort by report count and get top 3
+        final sortedBooks = reportCounts.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
+
+        bookReports = sortedBooks.take(3).map((entry) {
+          return {
+            'bookId': entry.key,
+            'title': bookTitles[entry.key] ?? 'Unknown Title',
+            'count': entry.value,
+          };
+        }).toList();
+      } else {
+        print('Failed to fetch reports. Status Code: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error fetching reports: $error');
+    }
+
+    return bookReports;
+  }
 
 
   Future<void> fetchBookCount() async {
@@ -241,13 +391,14 @@ class _AdminDashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5F5F5), 
+      backgroundColor: Color(0xFFF5F5F5),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Count Cards Section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -257,27 +408,313 @@ class _AdminDashboardPageState extends State<DashboardPage> {
                   TransactionCountCard(transactionCount: transactionCount),
                   ReviewCountCard(reviewCount: reviewCount),
                   ReportCountCard(reportCount: reportCount),
-                  UserCountCard(userCount: userCount), 
+                  UserCountCard(userCount: userCount),
                 ],
               ),
-
               SizedBox(height: 30),
 
-              SectionTitle(title: 'Popular Books'),
-              SizedBox(height: 10),
-              BookList(books: popularBooks),
+              // Gender Distribution Chart Section
+              SectionTitle(title: 'Gender Distribution'),
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: FutureBuilder<List<PieChartData>>(
+                  future: fetchGenderData(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error loading data'));
+                    } else if (snapshot.hasData) {
+                      final data = snapshot.data!;
+                      return SfCircularChart(
+                        title: ChartTitle(
+                          text: 'Gender Distribution',
+                          textStyle: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                        legend: Legend(
+                          isVisible: true,
+                          overflowMode: LegendItemOverflowMode.wrap,
+                          position: LegendPosition.bottom,
+                        ),
+                        series: <CircularSeries>[
+                          PieSeries<PieChartData, String>(
+                            dataSource: data,
+                            xValueMapper: (PieChartData data, _) => data.category,
+                            yValueMapper: (PieChartData data, _) => data.value,
+                            dataLabelSettings: DataLabelSettings(isVisible: true),
+                          ),
+                        ],
+                      );
+                    } else {
+                      return Center(child: Text('No data available'));
+                    }
+                  },
+                ),
+              ),
               SizedBox(height: 30),
 
-              SectionTitle(title: 'Latest Books'),
-              SizedBox(height: 10),
-              BookList(books: latestBooks),
+              // Top Viewed Books Chart Section
+              SectionTitle(title: 'Top 5 Most Viewed Books'),
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: FutureBuilder<List<Map<String, dynamic>>>(
+                  future: fetchTopViewedBooks(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error loading data'));
+                    } else if (snapshot.hasData) {
+                      final topBooks = snapshot.data!;
+                      return SfCartesianChart(
+                        primaryXAxis: CategoryAxis(
+                          labelStyle: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                          majorGridLines: MajorGridLines(width: 0),
+                        ),
+                        primaryYAxis: NumericAxis(
+                          labelStyle: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black54,
+                          ),
+                          majorGridLines: MajorGridLines(
+                            dashArray: [5, 5],
+                            color: Colors.grey.withOpacity(0.5),
+                          ),
+                        ),
+                        title: ChartTitle(
+                          text: 'Top 5 Most Viewed Books',
+                          textStyle: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                        tooltipBehavior: TooltipBehavior(
+                          enable: true,
+                          header: '',
+                          canShowMarker: false,
+                        ),
+                        series: <ChartSeries>[
+                          ColumnSeries<Map<String, dynamic>, String>(
+                            dataSource: topBooks,
+                            xValueMapper: (Map<String, dynamic> data, _) =>
+                            data['title'],
+                            yValueMapper: (Map<String, dynamic> data, _) =>
+                            data['views'],
+                            name: 'Views',
+                            dataLabelSettings: DataLabelSettings(
+                              isVisible: true,
+                              textStyle: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                            color: Color(0xFF5AA5B1),
+                          ),
+                        ],
+                        plotAreaBorderWidth: 0,
+                      );
+                    } else {
+                      return Center(child: Text('No data available'));
+                    }
+                  },
+                ),
+              ),
+              SizedBox(height: 30),
+
+              // Transaction Types Chart Section
+              SectionTitle(title: 'Transaction Type Overview'),
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: SfCartesianChart(
+                  primaryXAxis: CategoryAxis(
+                    labelStyle: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Colors.black87,
+                    ),
+                    majorGridLines: MajorGridLines(width: 0),
+                  ),
+                  primaryYAxis: NumericAxis(
+                    labelStyle: TextStyle(
+                      fontSize: 12,
+                      color: Colors.black54,
+                    ),
+                    majorGridLines: MajorGridLines(
+                      dashArray: [5, 5],
+                      color: Colors.grey.withOpacity(0.5),
+                    ),
+                  ),
+                  title: ChartTitle(
+                    text: 'Transaction Types',
+                    textStyle: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
+                  tooltipBehavior: TooltipBehavior(
+                    enable: true,
+                    header: '',
+                    canShowMarker: false,
+                  ),
+                  series: <ChartSeries>[
+                    ColumnSeries<MapEntry<String, int>, String>(
+                      dataSource: transactionTypeCounts.entries.toList(),
+                      xValueMapper: (MapEntry<String, int> data, _) => data.key,
+                      yValueMapper: (MapEntry<String, int> data, _) => data.value,
+                      name: 'Transactions',
+                      dataLabelSettings: DataLabelSettings(
+                        isVisible: true,
+                        textStyle: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(8)),
+                      color: Color(0xFF5AA5B1),
+                    ),
+                  ],
+                  plotAreaBorderWidth: 0,
+                ),
+              ),
+              SizedBox(height: 30),
+
+              // Top Reported Books Chart Section
+              SectionTitle(title: 'Top 3 Reported Books'),
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: FutureBuilder<List<Map<String, dynamic>>>(
+                  future: fetchTopReportedBooks(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error loading data'));
+                    } else if (snapshot.hasData) {
+                      final bookReports = snapshot.data!;
+                      return SfCartesianChart(
+                        primaryXAxis: CategoryAxis(
+                          labelStyle: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                          majorGridLines: MajorGridLines(width: 0),
+                        ),
+                        primaryYAxis: NumericAxis(
+                          labelStyle: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black54,
+                          ),
+                          majorGridLines: MajorGridLines(
+                            dashArray: [5, 5],
+                            color: Colors.grey.withOpacity(0.5),
+                          ),
+                        ),
+                        title: ChartTitle(
+                          text: 'Top 3 Reported Books',
+                          textStyle: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                        tooltipBehavior: TooltipBehavior(
+                          enable: true,
+                          header: '',
+                          canShowMarker: false,
+                        ),
+                        series: <ChartSeries>[
+                          ColumnSeries<Map<String, dynamic>, String>(
+                            dataSource: bookReports,
+                            xValueMapper: (Map<String, dynamic> data, _) =>
+                            data['title'],
+                            yValueMapper: (Map<String, dynamic> data, _) =>
+                            data['count'],
+                            name: 'Reports',
+                            dataLabelSettings: DataLabelSettings(
+                              isVisible: true,
+                              textStyle: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                            color: Color(0xFF5AA5B1),
+                          ),
+                        ],
+                        plotAreaBorderWidth: 0,
+                      );
+                    } else {
+                      return Center(child: Text('No data available'));
+                    }
+                  },
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
-
+  
 
 }
 class CategoryCountCard extends StatelessWidget {
@@ -637,141 +1074,7 @@ class SectionTitle extends StatelessWidget {
     );
   }
 }
-class BookList extends StatelessWidget {
-  final List<dynamic> books;
 
-  const BookList({Key? key, required this.books}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 200,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: books.length,
-        itemBuilder: (context, index) {
-          final book = books[index];
-          return BookCard(book: book);
-        },
-      ),
-    );
-  }
-}
-class BookCard extends StatelessWidget {
-  final dynamic book;
-
-  const BookCard({Key? key, required this.book}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 200, 
-      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 12), 
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: SingleChildScrollView( 
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                book['image'] ?? '',
-                height: 150,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    height: 150,
-                    color: Colors.grey[200],
-                    child: Icon(Icons.book, size: 50, color: Colors.grey),
-                  );
-                },
-              ),
-            ),
-            SizedBox(height: 12),
-
-            Text(
-              book['title'] ?? 'Unknown Title',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.black87,
-              ),
-            ),
-            SizedBox(height: 8),
-
-            Text(
-              book['category']?['title'] ?? 'Unknown Category',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.blueGrey,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-            SizedBox(height: 8),
-
-            Text(
-              book['description'] ?? 'No description available.',
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.black54,
-              ),
-            ),
-            SizedBox(height: 12),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.visibility, size: 16, color: Colors.redAccent),
-                    SizedBox(width: 4),
-                    Text(
-                      '${book['numberOfViews']} Views',
-                      style: TextStyle(fontSize: 14, color: Colors.redAccent),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Icon(Icons.star, size: 16, color: Colors.orange),
-                    SizedBox(width: 4),
-                    Text(
-                      '${book['rating'] ?? 'N/A'}',
-                      style: TextStyle(fontSize: 14, color: Colors.orange),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(height: 12),
-
-            if (book['authors'] != null && book['authors'].isNotEmpty)
-              Text(
-                'Author: ${book['authors'][0]['fullName'] ?? 'Unknown Author'}',
-                style: TextStyle(fontSize: 14, color: Colors.black87),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 class UserCountCard extends StatelessWidget {
   final int userCount;
 
@@ -827,3 +1130,10 @@ class UserCountCard extends StatelessWidget {
     );
   }
 }
+class PieChartData {
+  final String category; // e.g., "Male", "Female"
+  final int value; // e.g., number of users
+
+  PieChartData({required this.category, required this.value});
+}
+
